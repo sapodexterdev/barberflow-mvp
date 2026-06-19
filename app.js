@@ -766,7 +766,7 @@ $("#loginForm").addEventListener("submit", async event => {
   try {
     await window.BarberCloud.signIn(data.get("email"), data.get("password"));
   } catch (error) {
-    $("#authMessage").textContent = error.message;
+    $("#authMessage").textContent = window.BarberCloud.translateError(error);
     $("#authMessage").className = "auth-message error";
   }
 });
@@ -777,7 +777,7 @@ $("#signupForm").addEventListener("submit", async event => {
   try {
     await window.BarberCloud.signUp(data.get("email"), data.get("password"), data.get("shopName"));
   } catch (error) {
-    $("#authMessage").textContent = error.message;
+    $("#authMessage").textContent = window.BarberCloud.translateError(error);
     $("#authMessage").className = "auth-message error";
   }
 });
@@ -802,10 +802,7 @@ $("#resendForm").addEventListener("submit", async event => {
     localStorage.setItem("bf_pending_email", email);
     event.currentTarget.classList.remove("open");
   } catch (error) {
-    const rateLimited = error.status === 429 || /rate|security purposes|seconds/i.test(error.message);
-    $("#authMessage").textContent = rateLimited
-      ? "Limite temporário do Supabase. Aguarde alguns minutos e tente novamente."
-      : error.message;
+    $("#authMessage").textContent = window.BarberCloud.translateError(error);
     $("#authMessage").className = "auth-message error";
   } finally {
     submit.disabled = false;

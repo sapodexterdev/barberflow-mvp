@@ -7,6 +7,24 @@
   const config = window.BARBERFLOW_CONFIG || {};
   const configured = Boolean(config.supabaseUrl && config.supabaseAnonKey && window.supabase);
 
+  function translateError(error) {
+    const message = String(error?.message || error || "").toLowerCase();
+    const code = String(error?.code || "").toLowerCase();
+
+    if (message.includes("invalid login credentials")) return "E-mail ou senha incorretos.";
+    if (message.includes("email not confirmed")) return "Confirme seu e-mail antes de entrar.";
+    if (message.includes("user already registered")) return "Já existe uma conta com este e-mail.";
+    if (message.includes("password should be") || message.includes("weak_password")) return "A senha precisa ter pelo menos 6 caracteres.";
+    if (message.includes("signup is disabled")) return "A criação de contas está temporariamente desativada.";
+    if (message.includes("email rate limit") || message.includes("rate limit") || error?.status === 429) return "Muitas tentativas. Aguarde alguns minutos e tente novamente.";
+    if (message.includes("network") || message.includes("failed to fetch") || code === "fetch_error") return "Não foi possível conectar. Verifique sua internet e tente novamente.";
+    if (message.includes("user not found")) return "Não encontramos uma conta com este e-mail.";
+    if (message.includes("same password")) return "Escolha uma senha diferente da atual.";
+    if (message.includes("token has expired") || message.includes("otp_expired")) return "Este link expirou. Solicite um novo e-mail de confirmação.";
+    if (message.includes("email address") && message.includes("invalid")) return "Informe um endereço de e-mail válido.";
+    return "Não foi possível concluir a operação. Tente novamente.";
+  }
+
   function setMessage(text, type = "") {
     const message = document.querySelector("#authMessage");
     if (!message) return;
@@ -70,7 +88,7 @@
         await connectSession();
       } catch (error) {
         setSync("Erro de conexão", "error");
-        api.notify("Falha ao carregar banco", error.message);
+        api.notify("Falha ao carregar banco", translateError(error));
       }
     } else {
       showAuth(true);
@@ -82,7 +100,7 @@
         try {
           await connectSession();
         } catch (error) {
-          setMessage(error.message, "error");
+          setMessage(translateError(error), "error");
         }
       }
       if (event === "SIGNED_OUT") {
@@ -144,5 +162,5 @@
     if (client) await client.auth.signOut();
   }
 
-  window.BarberCloud = { start, signIn, signUp, resendConfirmation, signOut, queueSave, configured };
+  window.BarberCloud = { start, signIn, signUp, resendConfirmation, signOut, queueSave, translateError, configured };
 })();
