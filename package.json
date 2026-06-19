@@ -1,0 +1,9 @@
+{
+  "name": "barberflow-mvp",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MVP de gestão para pequenas barbearias",
+  "scripts": {
+    "start": "node server.js"
+  }
+}

@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#111310">
+  <title>BarberFlow — Sua barbearia no controle</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">B</div>
+        <div><strong>BarberFlow</strong><span>gestão sem enrolação</span></div>
+      </div>
+
+      <nav class="nav" aria-label="Menu principal">
+        <button class="nav-item active" data-view="inicio"><span>⌂</span> Visão geral</button>
+        <button class="nav-item" data-view="agenda"><span>▦</span> Agenda <b id="agendaBadge">3</b></button>
+        <button class="nav-item" data-view="clientes"><span>♙</span> Clientes</button>
+        <button class="nav-item" data-view="servicos"><span>✂</span> Serviços</button>
+        <button class="nav-item" data-view="profissionais"><span>♟</span> Profissionais</button>
+        <button class="nav-item" data-view="horarios"><span>◷</span> Horários</button>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <div class="plan-card">
+          <span>PLANO ESSENCIAL</span>
+          <strong>14 dias grátis</strong>
+          <small>Configure seu WhatsApp para aproveitar tudo.</small>
+          <button data-view-target="configuracoes">Configurar agora →</button>
+        </div>
+        <button class="nav-item" data-view="configuracoes"><span>⚙</span> Configurações</button>
+        <div class="profile">
+          <div class="avatar">RL</div>
+          <div><strong>Rafael Luz</strong><span>Barbearia do Rafa</span></div>
+          <button>•••</button>
+        </div>
+      </div>
+    </aside>
+    <button class="sidebar-overlay" aria-label="Fechar menu lateral"></button>
+
+    <main>
+      <header class="topbar">
+        <button class="mobile-menu" aria-label="Abrir menu">☰</button>
+        <div>
+          <p class="eyebrow" id="todayLabel"></p>
+          <h1 id="pageTitle">Bom dia, Rafael! <span>👋</span></h1>
+        </div>
+        <div class="top-actions">
+          <button class="icon-button" aria-label="Notificações">♢<i></i></button>
+          <button class="primary-button" data-open-booking><span>＋</span> Novo agendamento</button>
+        </div>
+      </header>
+
+      <section class="view active" id="inicio">
+        <div class="welcome-strip">
+          <div>
+            <span class="live-dot"></span>
+            <strong>Seu dia está bem encaminhado.</strong>
+            <p>Você tem <b id="dayCountText">3 atendimentos</b> hoje e uma janela livre às 15:00.</p>
+          </div>
+          <button data-view-target="agenda">Ver agenda do dia →</button>
+        </div>
+
+        <div class="metric-grid">
+          <article class="metric-card metric-link" data-view-target="agenda" role="button" tabindex="0" aria-label="Abrir agenda de atendimentos">
+            <div class="metric-icon green">▦</div>
+            <span>ATENDIMENTOS HOJE</span>
+            <strong id="metricAppointments">3</strong>
+            <small><b>↑ 1</b> comparado a ontem</small>
+          </article>
+          <article class="metric-card metric-link" data-view-target="agenda" role="button" tabindex="0" aria-label="Abrir previsão do dia na agenda">
+            <div class="metric-icon gold">R$</div>
+            <span>PREVISÃO DO DIA</span>
+            <strong id="metricRevenue">R$ 105</strong>
+            <small>com base nos agendamentos</small>
+          </article>
+          <article class="metric-card metric-link" data-view-target="clientes" role="button" tabindex="0" aria-label="Abrir clientes">
+            <div class="metric-icon blue">♙</div>
+            <span>CLIENTES ESTE MÊS</span>
+            <strong id="metricClients">24</strong>
+            <small><b>↑ 18%</b> vs. mês passado</small>
+          </article>
+          <article class="metric-card whatsapp-card metric-link" data-view-target="configuracoes" role="button" tabindex="0" aria-label="Abrir configurações do WhatsApp">
+            <div class="metric-icon whatsapp">◉</div>
+            <span>WHATSAPP</span>
+            <strong>Pronto para conectar</strong>
+            <small>Ative lembretes automáticos</small>
+            <button data-view-target="configuracoes">Conectar →</button>
+          </article>
+        </div>
+
+        <div class="dashboard-grid">
+          <article class="panel schedule-panel">
+            <div class="panel-head">
+              <div><span>PRÓXIMOS ATENDIMENTOS</span><h2>Agenda de hoje</h2></div>
+              <button data-view-target="agenda">Ver agenda completa</button>
+            </div>
+            <div id="todaySchedule" class="appointment-list"></div>
+          </article>
+
+          <article class="panel quick-panel">
+            <div class="panel-head"><div><span>ATALHOS</span><h2>Resolva rapidinho</h2></div></div>
+            <div class="quick-grid">
+              <button data-open-booking><i class="quick-icon">＋</i><span><strong>Agendar horário</strong><small>Adicione em poucos passos</small></span><b>›</b></button>
+              <button data-view-target="clientes"><i class="quick-icon">♙</i><span><strong>Novo cliente</strong><small>Cadastre nome e WhatsApp</small></span><b>›</b></button>
+              <button id="shareLink"><i class="quick-icon">↗</i><span><strong>Compartilhar agenda</strong><small>Envie seu link pelo WhatsApp</small></span><b>›</b></button>
+              <button data-view-target="servicos"><i class="quick-icon">✂</i><span><strong>Editar serviços</strong><small>Preços e duração</small></span><b>›</b></button>
+            </div>
+            <div class="tip"><span>✦</span><p><strong>Dica do BarberFlow</strong>Clientes que recebem lembrete faltam até 70% menos.</p></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="view" id="agenda">
+        <div class="section-toolbar">
+          <div><p class="eyebrow">ORGANIZAÇÃO DO DIA</p><h2>Sua agenda</h2></div>
+          <div class="date-switcher"><button id="prevDay">‹</button><strong id="agendaDate"></strong><button id="nextDay">›</button></div>
+        </div>
+        <div class="agenda-layout">
+          <div class="timeline" id="timeline"></div>
+          <aside class="day-summary">
+            <span>RESUMO DO DIA</span>
+            <div><strong id="summaryCount">3</strong><small>atendimentos</small></div>
+            <div><strong id="summaryRevenue">R$ 105</strong><small>previsão</small></div>
+            <hr>
+            <p><i></i> Confirmados</p>
+            <p><i class="pending"></i> Aguardando</p>
+          </aside>
+        </div>
+      </section>
+
+      <section class="view" id="clientes">
+        <div class="section-toolbar">
+          <div><p class="eyebrow">RELACIONAMENTO</p><h2>Seus clientes</h2></div>
+          <button class="primary-button" id="newClient">＋ Novo cliente</button>
+        </div>
+        <div class="table-card">
+          <div class="table-tools"><input id="clientSearch" placeholder="Buscar por nome ou telefone..."><span id="clientTotal"></span></div>
+          <div class="client-list" id="clientList"></div>
+        </div>
+      </section>
+
+      <section class="view" id="servicos">
+        <div class="section-toolbar">
+          <div><p class="eyebrow">SEU CARDÁPIO</p><h2>Serviços e preços</h2></div>
+          <button class="primary-button" id="newService">＋ Novo serviço</button>
+        </div>
+        <div class="service-grid" id="serviceGrid"></div>
+      </section>
+
+      <section class="view" id="profissionais">
+        <div class="section-toolbar">
+          <div><p class="eyebrow">SUA EQUIPE</p><h2>Profissionais</h2></div>
+          <button class="primary-button" id="newProfessional">＋ Novo profissional</button>
+        </div>
+        <div class="professional-grid" id="professionalGrid"></div>
+      </section>
+
+      <section class="view" id="horarios">
+        <div class="section-toolbar">
+          <div><p class="eyebrow">DISPONIBILIDADE</p><h2>Horários de atendimento</h2></div>
+          <button class="primary-button" id="saveSchedule">Salvar horários</button>
+        </div>
+        <div class="schedule-settings-grid">
+          <article class="panel weekly-hours">
+            <div class="panel-head">
+              <div><span>ROTINA SEMANAL</span><h2>Quando a barbearia abre?</h2></div>
+            </div>
+            <div class="weekly-list" id="weeklySchedule"></div>
+          </article>
+          <div class="schedule-side">
+            <article class="panel special-window">
+              <div class="panel-head">
+                <div><span>JANELA ESPECIAL</span><h2>Ajuste um dia específico</h2></div>
+              </div>
+              <form id="specialWindowForm">
+                <p>Use quando precisar abrir mais tarde, fechar mais cedo ou não atender em uma data.</p>
+                <label>Data<input name="date" type="date" required></label>
+                <label class="closed-day-toggle">
+                  <div><strong>Não haverá atendimento</strong><small>Bloqueia o dia inteiro</small></div>
+                  <input name="closed" type="checkbox">
+                </label>
+                <div class="form-row special-time-fields">
+                  <label>Das<input name="start" type="time" value="09:00" required></label>
+                  <label>Até<input name="end" type="time" value="18:00" required></label>
+                </div>
+                <button class="primary-button full" type="submit">Adicionar janela especial</button>
+              </form>
+            </article>
+            <article class="panel exceptions-panel">
+              <div class="panel-head"><div><span>PRÓXIMAS ALTERAÇÕES</span><h2>Janelas programadas</h2></div></div>
+              <div id="specialWindowsList"></div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="configuracoes">
+        <div class="section-toolbar">
+          <div><p class="eyebrow">INTEGRAÇÕES</p><h2>WhatsApp inteligente</h2></div>
+        </div>
+        <div class="settings-grid">
+          <article class="panel integration-card">
+            <div class="whatsapp-logo">◉</div>
+            <div>
+              <span>WHATSAPP BUSINESS</span>
+              <h2>Converse menos, atenda mais.</h2>
+              <p>Envie confirmações, lembretes e seu link de agendamento com mensagens prontas e personalizadas.</p>
+            </div>
+            <label>WhatsApp da barbearia<input id="businessPhone" value="5531999999999" inputmode="numeric"></label>
+            <button class="primary-button" id="saveWhatsapp">Salvar e testar conexão</button>
+          </article>
+          <article class="panel automation-card">
+            <span>AUTOMAÇÕES DO MVP</span>
+            <label><div><strong>Confirmação de agendamento</strong><small>Mensagem pronta logo após marcar</small></div><input type="checkbox" checked></label>
+            <label><div><strong>Lembrete no dia anterior</strong><small>Reduza faltas e horários vazios</small></div><input type="checkbox" checked></label>
+            <label><div><strong>Mensagem pós-atendimento</strong><small>Peça avaliação e estimule o retorno</small></div><input type="checkbox"></label>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="bookingModal" aria-hidden="true">
+    <div class="modal">
+      <button class="modal-close" data-close-modal>×</button>
+      <p class="eyebrow">NOVO AGENDAMENTO</p>
+      <h2>Reserve um horário</h2>
+      <p class="modal-subtitle">Preencha os dados. A confirmação já fica pronta para o WhatsApp.</p>
+      <form id="bookingForm">
+        <label>Cliente
+          <div class="client-combobox" id="bookingClientBox">
+            <input id="bookingClientSearch" type="search" placeholder="Digite o nome ou WhatsApp..." autocomplete="off">
+            <input name="clientId" id="bookingClient" type="hidden">
+            <div class="client-search-results" id="bookingClientResults"></div>
+          </div>
+        </label>
+        <button class="new-client-toggle" id="toggleNewBookingClient" type="button">＋ Cliente ainda não cadastrado</button>
+        <div class="booking-new-client" id="bookingNewClient">
+          <div class="new-client-head">
+            <strong>Novo cliente</strong>
+            <button type="button" id="cancelNewBookingClient">Usar cliente cadastrado</button>
+          </div>
+          <label>Nome completo<input name="name" placeholder="Nome do cliente"></label>
+          <label>WhatsApp<input name="phone" placeholder="(31) 99999-9999" inputmode="tel"></label>
+        </div>
+        <div class="form-row">
+          <label>Serviço<select name="service" id="bookingService"></select></label>
+          <label>Profissional<select name="barber" id="bookingBarber"></select></label>
+        </div>
+        <div class="form-row">
+          <label>Data<input name="date" type="date" required></label>
+          <label>Horário<select name="time"><option>09:00</option><option>10:30</option><option>13:30</option><option>15:00</option><option>16:30</option><option>18:00</option></select></label>
+        </div>
+        <button class="primary-button full" type="submit">Confirmar agendamento</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="serviceModal" aria-hidden="true">
+    <div class="modal">
+      <button class="modal-close" data-close-service-modal>×</button>
+      <p class="eyebrow">EDITAR SERVIÇO</p>
+      <h2>Serviço e preço</h2>
+      <p class="modal-subtitle">As alterações serão aplicadas aos próximos agendamentos.</p>
+      <form id="serviceForm">
+        <input name="id" type="hidden">
+        <label>Nome do serviço<input name="name" required></label>
+        <label>Descrição<input name="description" required></label>
+        <div class="form-row">
+          <label>Duração em minutos<input name="duration" type="number" min="5" step="5" required></label>
+          <label>Preço em reais<input name="price" type="number" min="0" step="0.01" required></label>
+        </div>
+        <button class="primary-button full" type="submit">Salvar alterações</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="newServiceModal" aria-hidden="true">
+    <div class="modal service-create-modal">
+      <button class="modal-close" data-close-new-service-modal>×</button>
+      <div class="service-create-head">
+        <div class="service-create-icon">✂</div>
+        <div>
+          <p class="eyebrow">NOVO SERVIÇO</p>
+          <h2>O que você oferece?</h2>
+          <p class="modal-subtitle">Cadastre um serviço para ele aparecer na agenda e no atendimento.</p>
+        </div>
+      </div>
+      <form id="newServiceForm">
+        <label>Nome do serviço<input name="name" placeholder="Ex.: Corte degradê" required maxlength="60"></label>
+        <label>Descrição <span class="optional">opcional</span><input name="description" placeholder="Conte rapidamente o que está incluso" maxlength="120"></label>
+        <div class="form-row">
+          <label>Duração
+            <select name="duration" required>
+              <option value="20">20 minutos</option>
+              <option value="30">30 minutos</option>
+              <option value="40" selected>40 minutos</option>
+              <option value="45">45 minutos</option>
+              <option value="60">1 hora</option>
+              <option value="90">1h30</option>
+            </select>
+          </label>
+          <label>Preço
+            <div class="price-input"><span>R$</span><input name="price" type="number" min="0" step="0.01" placeholder="35,00" required></div>
+          </label>
+        </div>
+        <fieldset class="icon-picker">
+          <legend>Escolha um ícone</legend>
+          <label><input type="radio" name="icon" value="✂" checked><span>✂</span></label>
+          <label><input type="radio" name="icon" value="♢"><span>♢</span></label>
+          <label><input type="radio" name="icon" value="★"><span>★</span></label>
+          <label><input type="radio" name="icon" value="⚡"><span>⚡</span></label>
+        </fieldset>
+        <div class="service-form-actions">
+          <button class="secondary-button" type="button" data-cancel-new-service>Cancelar</button>
+          <button class="primary-button" type="submit">＋ Cadastrar serviço</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="professionalModal" aria-hidden="true">
+    <div class="modal professional-modal">
+      <button class="modal-close" data-close-professional-modal>×</button>
+      <div class="professional-form-head">
+        <div class="professional-avatar-preview" id="professionalAvatarPreview">NP</div>
+        <div>
+          <p class="eyebrow" id="professionalModalEyebrow">NOVO PROFISSIONAL</p>
+          <h2 id="professionalModalTitle">Adicionar à equipe</h2>
+          <p class="modal-subtitle">Esses dados serão usados na agenda e nos atendimentos.</p>
+        </div>
+      </div>
+      <form id="professionalForm">
+        <input name="id" type="hidden">
+        <label>Nome completo<input name="name" placeholder="Ex.: João Silva" required maxlength="70"></label>
+        <div class="form-row">
+          <label>WhatsApp<input name="phone" placeholder="(31) 99999-9999" inputmode="tel" required></label>
+          <label>Especialidade<input name="specialty" placeholder="Ex.: Cortes e barba" required maxlength="60"></label>
+        </div>
+        <div class="form-row">
+          <label>Tempo médio por atendimento
+            <select name="defaultDuration">
+              <option value="30">30 minutos</option>
+              <option value="40" selected>40 minutos</option>
+              <option value="45">45 minutos</option>
+              <option value="60">1 hora</option>
+            </select>
+          </label>
+          <label>Status
+            <select name="active">
+              <option value="true">Ativo na agenda</option>
+              <option value="false">Inativo</option>
+            </select>
+          </label>
+        </div>
+        <fieldset class="color-picker">
+          <legend>Cor na agenda</legend>
+          <label><input type="radio" name="color" value="#2f8f63" checked><span style="--swatch:#2f8f63"></span></label>
+          <label><input type="radio" name="color" value="#436bb2"><span style="--swatch:#436bb2"></span></label>
+          <label><input type="radio" name="color" value="#bd7a2d"><span style="--swatch:#bd7a2d"></span></label>
+          <label><input type="radio" name="color" value="#8b5bb5"><span style="--swatch:#8b5bb5"></span></label>
+          <label><input type="radio" name="color" value="#bd5364"><span style="--swatch:#bd5364"></span></label>
+        </fieldset>
+        <div class="service-form-actions">
+          <button class="secondary-button" type="button" data-cancel-professional>Cancelar</button>
+          <button class="primary-button" type="submit" id="saveProfessional">Cadastrar profissional</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"><span>✓</span><div><strong>Pronto!</strong><small></small></div></div>
+  <script src="app.js"></script>
+</body>
+</html>
