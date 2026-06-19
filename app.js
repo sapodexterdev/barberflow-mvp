@@ -812,7 +812,7 @@ function book(event) {
   showToast("Horário reservado!", `${appointment.name}, ${appointment.date.split("-").reverse().join("/")} às ${appointment.time}.`);
   setTimeout(() => {
     if (confirm("Agendamento salvo. Deseja abrir a confirmação pronta no WhatsApp?")) {
-      whatsapp(appointment.phone, `Olá, ${appointment.name}! ✂️ Seu horário na Barbearia do Rafa está confirmado para ${appointment.date.split("-").reverse().join("/")} às ${appointment.time}. Serviço: ${appointment.service}. Até lá!`);
+      whatsapp(appointment.phone, `Olá, ${appointment.name}! ✂️ Seu horário no Clube da Régua está confirmado para ${appointment.date.split("-").reverse().join("/")} às ${appointment.time}. Serviço: ${appointment.service}. Até lá!`);
     }
   }, 250);
 }
@@ -928,7 +928,7 @@ $("#timeline").addEventListener("click", event => {
   if (empty) openBooking(empty.dataset.time);
   if (reminder) {
     const item = state.appointments.find(appt => appt.id === Number(reminder.dataset.id));
-    whatsapp(item.phone, `Olá, ${item.name}! Passando para lembrar do seu horário hoje às ${item.time} na Barbearia do Rafa. Responda SIM para confirmar. ✂️`);
+    whatsapp(item.phone, `Olá, ${item.name}! Passando para lembrar do seu horário hoje às ${item.time} no Clube da Régua. Responda SIM para confirmar. ✂️`);
   }
 });
 
@@ -976,7 +976,7 @@ $("#clientList").addEventListener("click", event => {
 });
 
 $("#shareLink").addEventListener("click", () => {
-  const message = "Olá! Você pode escolher seu próximo horário na Barbearia do Rafa por aqui: https://barberflow.app/rafa-barbearia ✂️";
+  const message = "Olá! Você pode escolher seu próximo horário no Clube da Régua por aqui. ✂️";
   whatsapp(state.phone, message);
 });
 

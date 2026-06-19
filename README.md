@@ -1,4 +1,4 @@
-# BarberFlow MVP
+# Clube da Régua MVP
 
 Painel funcional para pequenas barbearias, com agenda, clientes, serviços e mensagens inteligentes para WhatsApp.
 

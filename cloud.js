@@ -48,7 +48,7 @@
     const { data, error } = await client.rpc("get_my_barbershop_state");
     if (error) throw error;
     if (data?.length) return data[0];
-    const shopName = localStorage.getItem("bf_shop_name") || "Barbearia do Rafa";
+    const shopName = localStorage.getItem("bf_shop_name") || "Clube da Régua";
     const result = await client.rpc("initialize_barbershop", {
       shop_name: shopName,
       initial_data: api.getState()

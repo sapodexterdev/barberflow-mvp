@@ -10,6 +10,10 @@ fs.mkdirSync(output, { recursive: true });
 for (const file of files) {
   fs.copyFileSync(path.join(__dirname, file), path.join(output, file));
 }
+fs.mkdirSync(path.join(output, "assets"), { recursive: true });
+for (const asset of ["clube-da-regua-icon-192.png", "favicon.png"]) {
+  fs.copyFileSync(path.join(__dirname, "assets", asset), path.join(output, "assets", asset));
+}
 
 const config = `window.BARBERFLOW_CONFIG = ${JSON.stringify({
   supabaseUrl:
