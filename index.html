@@ -35,6 +35,7 @@
           <button data-view-target="configuracoes">Configurar agora →</button>
         </div>
         <button class="nav-item" data-view="configuracoes"><span>⚙</span> Configurações</button>
+        <button class="nav-item logout-button" id="logoutButton" hidden><span>↪</span> Sair da conta</button>
         <div class="profile">
           <div class="avatar">RL</div>
           <div><strong>Rafael Luz</strong><span>Barbearia do Rafa</span></div>
@@ -52,6 +53,7 @@
           <h1 id="pageTitle">Bom dia, Rafael! <span>👋</span></h1>
         </div>
         <div class="top-actions">
+          <span class="cloud-status" id="cloudStatus">Modo local</span>
           <button class="icon-button" aria-label="Notificações">♢<i></i></button>
           <button class="primary-button" data-open-booking><span>＋</span> Novo agendamento</button>
         </div>
@@ -377,6 +379,37 @@
   </div>
 
   <div class="toast" id="toast"><span>✓</span><div><strong>Pronto!</strong><small></small></div></div>
+  <div class="auth-screen" id="authScreen">
+    <div class="auth-card">
+      <div class="brand auth-brand">
+        <div class="brand-mark">B</div>
+        <div><strong>BarberFlow</strong><span>SUA BARBEARIA ONLINE</span></div>
+      </div>
+      <div class="auth-tabs">
+        <button class="active" data-auth-tab="login">Entrar</button>
+        <button data-auth-tab="signup">Criar conta</button>
+      </div>
+      <form id="loginForm" class="auth-form active">
+        <h2>Bem-vindo de volta</h2>
+        <p>Acesse a agenda compartilhada da sua barbearia.</p>
+        <label>E-mail<input name="email" type="email" autocomplete="email" required></label>
+        <label>Senha<input name="password" type="password" autocomplete="current-password" minlength="6" required></label>
+        <button class="primary-button full" type="submit">Entrar no BarberFlow</button>
+      </form>
+      <form id="signupForm" class="auth-form">
+        <h2>Crie sua barbearia</h2>
+        <p>Comece com uma conta segura e dados sincronizados.</p>
+        <label>Nome da barbearia<input name="shopName" placeholder="Ex.: Barbearia do Rafa" required></label>
+        <label>E-mail<input name="email" type="email" autocomplete="email" required></label>
+        <label>Senha<input name="password" type="password" autocomplete="new-password" minlength="6" required></label>
+        <button class="primary-button full" type="submit">Criar conta gratuita</button>
+      </form>
+      <div class="auth-message" id="authMessage"></div>
+    </div>
+  </div>
+  <script src="config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="cloud.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

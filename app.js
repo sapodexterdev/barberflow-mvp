@@ -56,6 +56,7 @@ const state = {
   selectedDate: new Date(today),
   phone: localStorage.getItem("bf_phone") || "5531999999999"
 };
+let applyingCloudState = false;
 
 const $ = selector => document.querySelector(selector);
 const $$ = selector => [...document.querySelectorAll(selector)];
@@ -70,6 +71,41 @@ function persist() {
   localStorage.setItem("bf_weekly_schedule", JSON.stringify(state.weeklySchedule));
   localStorage.setItem("bf_special_windows", JSON.stringify(state.specialWindows));
   localStorage.setItem("bf_appointments", JSON.stringify(state.appointments));
+  if (!applyingCloudState) window.BarberCloud?.queueSave(exportState());
+}
+
+function exportState() {
+  return {
+    services: state.services,
+    clients: state.clients,
+    professionals: state.professionals,
+    weeklySchedule: state.weeklySchedule,
+    specialWindows: state.specialWindows,
+    appointments: state.appointments,
+    phone: state.phone
+  };
+}
+
+function applyCloudState(data) {
+  applyingCloudState = true;
+  state.services = Array.isArray(data.services) ? data.services : state.services;
+  state.clients = Array.isArray(data.clients) ? data.clients : state.clients;
+  state.professionals = Array.isArray(data.professionals) ? data.professionals : state.professionals;
+  state.weeklySchedule = data.weeklySchedule || state.weeklySchedule;
+  state.specialWindows = Array.isArray(data.specialWindows) ? data.specialWindows : state.specialWindows;
+  state.appointments = Array.isArray(data.appointments) ? data.appointments : state.appointments;
+  state.phone = data.phone || state.phone;
+  localStorage.setItem("bf_phone", state.phone);
+  persist();
+  applyingCloudState = false;
+  $("#businessPhone").value = state.phone;
+  renderDashboard();
+  renderAgenda();
+  renderClients();
+  renderServices();
+  renderProfessionals();
+  renderScheduleSettings();
+  renderBookingClients();
 }
 
 function showToast(title, text) {
@@ -716,4 +752,40 @@ document.addEventListener("keydown", event => {
     closeNewService();
     closeProfessionalEditor();
   }
+});
+
+$$("[data-auth-tab]").forEach(button => button.addEventListener("click", () => {
+  $$("[data-auth-tab]").forEach(item => item.classList.toggle("active", item === button));
+  $$(".auth-form").forEach(form => form.classList.toggle("active", form.id === `${button.dataset.authTab}Form`));
+  $("#authMessage").textContent = "";
+}));
+
+$("#loginForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  const data = new FormData(event.currentTarget);
+  try {
+    await window.BarberCloud.signIn(data.get("email"), data.get("password"));
+  } catch (error) {
+    $("#authMessage").textContent = error.message;
+    $("#authMessage").className = "auth-message error";
+  }
+});
+
+$("#signupForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  const data = new FormData(event.currentTarget);
+  try {
+    await window.BarberCloud.signUp(data.get("email"), data.get("password"), data.get("shopName"));
+  } catch (error) {
+    $("#authMessage").textContent = error.message;
+    $("#authMessage").className = "auth-message error";
+  }
+});
+
+$("#logoutButton").addEventListener("click", () => window.BarberCloud?.signOut());
+
+window.BarberCloud?.start({
+  getState: exportState,
+  applyState: applyCloudState,
+  notify: showToast
 });
