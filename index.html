@@ -414,12 +414,13 @@
       <div class="client-create-head">
         <div class="client-avatar-preview" id="clientAvatarPreview">NC</div>
         <div>
-          <p class="eyebrow">NOVO CLIENTE</p>
-          <h2>Quem chegou na barbearia?</h2>
-          <p class="modal-subtitle">Cadastre uma vez e agilize todos os próximos agendamentos.</p>
+          <p class="eyebrow" id="clientModalEyebrow">NOVO CLIENTE</p>
+          <h2 id="clientModalTitle">Quem chegou na barbearia?</h2>
+          <p class="modal-subtitle" id="clientModalSubtitle">Cadastre uma vez e agilize todos os próximos agendamentos.</p>
         </div>
       </div>
       <form id="clientForm">
+        <input name="originalPhone" type="hidden">
         <label>Nome completo<input name="name" placeholder="Ex.: Lucas Ferreira" required maxlength="80"></label>
         <div class="form-row">
           <label>WhatsApp<input name="phone" placeholder="(31) 99999-9999" inputmode="tel" required></label>
@@ -444,7 +445,7 @@
         </label>
         <div class="service-form-actions">
           <button class="secondary-button" type="button" data-cancel-client>Cancelar</button>
-          <button class="primary-button" type="submit">＋ Cadastrar cliente</button>
+          <button class="primary-button" id="saveClientButton" type="submit">＋ Cadastrar cliente</button>
         </div>
       </form>
     </div>

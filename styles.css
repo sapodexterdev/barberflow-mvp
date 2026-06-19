@@ -215,6 +215,8 @@ h1 span { font-size: .75em; }
 .client-row .avatar { background: #edf0e6; }
 .client-row strong, .client-row span, .client-row small { display: block; }.client-row strong { font-size: 12px; }.client-row span, .client-row small { color: #8b9087; font-size: 10px; }
 .client-row button { padding: 7px 10px; border: 0; border-radius: 8px; color: #208b4d; background: #e8f5ed; font-size: 11px; }
+.client-actions { display: flex; gap: 7px; align-items: center; }
+.client-row .client-edit { width: 34px; height: 34px; padding: 0; color: #6f5744; border: 1px solid #dbc5ad; background: #fffaf2; font-size: 16px; }
 .service-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
 .service-card { padding: 22px; border: 1px solid var(--line); border-radius: 14px; background: white; }
 .service-card > span { width: 42px; height: 42px; border-radius: 11px; display: grid; place-items: center; color: var(--green); background: var(--soft-green); font-size: 19px; }
@@ -616,6 +618,31 @@ form input:focus, form select:focus, form textarea:focus { border-color: #82ad91
     left: 12px;
     min-width: 0;
   }
+
+  .table-tools {
+    padding: 14px;
+    display: grid;
+    gap: 8px;
+  }
+  .table-tools input { width: 100%; }
+  .table-tools span { padding-left: 3px; }
+  .client-row {
+    padding: 13px 14px;
+    grid-template-columns: 38px minmax(0, 1fr) auto;
+    gap: 10px;
+  }
+  .client-row .avatar { width: 38px; height: 38px; }
+  .client-actions { gap: 5px; }
+  .client-row .client-edit,
+  .client-row .client-whatsapp {
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    display: grid;
+    place-items: center;
+  }
+  .client-row .client-whatsapp { font-size: 0; }
+  .client-row .client-whatsapp::after { content: "◉"; font-size: 15px; }
 }
 
 @media (max-width: 390px) {

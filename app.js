@@ -415,7 +415,10 @@ function renderClients(filter = "") {
       <div><strong>${client.name}</strong><span>${formatPhone(client.phone)}</span></div>
       <div><strong>${client.visits} visitas</strong><small>histórico</small></div>
       <div><strong>${client.last}</strong><small>último atendimento</small></div>
-      <button class="client-whatsapp" data-phone="${client.phone}" data-name="${client.name}">◉ WhatsApp</button>
+      <div class="client-actions">
+        <button class="client-edit" data-edit-client="${client.phone}" aria-label="Editar ${client.name}" title="Editar cliente">✎</button>
+        <button class="client-whatsapp" data-phone="${client.phone}" data-name="${client.name}">◉ WhatsApp</button>
+      </div>
     </div>`).join("") || `<div class="client-row"><div></div><strong>Nenhum cliente encontrado.</strong></div>`;
 }
 
@@ -708,11 +711,24 @@ function closeProfessionalEditor() {
   $("#professionalModal").setAttribute("aria-hidden", "true");
 }
 
-function openClientEditor() {
+function openClientEditor(clientPhone = "") {
   const form = $("#clientForm");
+  const client = state.clients.find(item => sanitizePhone(item.phone) === sanitizePhone(clientPhone));
   form.reset();
-  form.elements.marketing.checked = true;
-  $("#clientAvatarPreview").textContent = "NC";
+  form.elements.originalPhone.value = client ? sanitizePhone(client.phone) : "";
+  form.elements.name.value = client?.name || "";
+  form.elements.phone.value = client?.phone || "";
+  form.elements.birthday.value = client?.birthday || "";
+  form.elements.source.value = client?.source || "";
+  form.elements.notes.value = client?.notes || "";
+  form.elements.marketing.checked = client ? client.marketing !== false : true;
+  $("#clientAvatarPreview").textContent = initials(client?.name || "Novo Cliente");
+  $("#clientModalEyebrow").textContent = client ? "EDITAR CLIENTE" : "NOVO CLIENTE";
+  $("#clientModalTitle").textContent = client ? "Dados do cliente" : "Quem chegou na barbearia?";
+  $("#clientModalSubtitle").textContent = client
+    ? "Mantenha o contato e as preferências sempre atualizados."
+    : "Cadastre uma vez e agilize todos os próximos agendamentos.";
+  $("#saveClientButton").textContent = client ? "Salvar alterações" : "＋ Cadastrar cliente";
   $("#clientModal").classList.add("open");
   $("#clientModal").setAttribute("aria-hidden", "false");
   setTimeout(() => form.elements.name.focus(), 100);
@@ -728,15 +744,17 @@ function saveClientData(event) {
   const data = new FormData(event.currentTarget);
   const phone = sanitizePhone(data.get("phone"));
   const name = data.get("name").trim();
+  const originalPhone = sanitizePhone(data.get("originalPhone"));
+  const existingClient = state.clients.find(client => sanitizePhone(client.phone) === originalPhone);
   if (phone.length < 10) {
     showToast("WhatsApp incompleto", "Informe o DDD e o número do cliente.");
     return;
   }
-  if (state.clients.some(client => sanitizePhone(client.phone) === phone)) {
+  if (state.clients.some(client => sanitizePhone(client.phone) === phone && client !== existingClient)) {
     showToast("Cliente já cadastrado", "Já existe um cliente com este WhatsApp.");
     return;
   }
-  state.clients.unshift({
+  const values = {
     name,
     phone,
     birthday: data.get("birthday") || "",
@@ -745,12 +763,25 @@ function saveClientData(event) {
     marketing: data.get("marketing") === "on",
     visits: 0,
     last: "Novo cliente"
-  });
+  };
+  if (existingClient) {
+    values.visits = existingClient.visits || 0;
+    values.last = existingClient.last || "Novo cliente";
+    Object.assign(existingClient, values);
+    if (originalPhone !== phone) {
+      state.appointments.forEach(appointment => {
+        if (sanitizePhone(appointment.phone) === originalPhone) appointment.phone = phone;
+      });
+    }
+  } else {
+    state.clients.unshift(values);
+  }
   persist();
   renderClients();
   renderBookingClients();
   closeClientEditor();
-  showToast("Cliente cadastrado", `${name} já pode ser selecionado nos agendamentos.`);
+  showToast(existingClient ? "Cliente atualizado" : "Cliente cadastrado",
+    existingClient ? `Os dados de ${name} foram salvos.` : `${name} já pode ser selecionado nos agendamentos.`);
 }
 
 function saveProfessionalData(event) {
@@ -1030,6 +1061,11 @@ $("#timeline").addEventListener("drop", event => {
 });
 
 $("#clientList").addEventListener("click", event => {
+  const editButton = event.target.closest("[data-edit-client]");
+  if (editButton) {
+    openClientEditor(editButton.dataset.editClient);
+    return;
+  }
   const button = event.target.closest(".client-whatsapp");
   if (button) whatsapp(button.dataset.phone, `Fala, ${button.dataset.name.split(" ")[0]}! Tudo bem? Já está na hora de dar aquele trato no visual? Tenho alguns horários livres esta semana. ✂️`);
 });
@@ -1045,8 +1081,8 @@ $("#saveWhatsapp").addEventListener("click", () => {
   showToast("WhatsApp configurado", "Número salvo. As mensagens inteligentes estão prontas.");
 });
 
-$("#newClient").addEventListener("click", openClientEditor);
-$$("[data-open-client]").forEach(button => button.addEventListener("click", openClientEditor));
+$("#newClient").addEventListener("click", () => openClientEditor());
+$$("[data-open-client]").forEach(button => button.addEventListener("click", () => openClientEditor()));
 
 $("#newService").addEventListener("click", openNewService);
 $("#newProfessional").addEventListener("click", () => openProfessionalEditor());
