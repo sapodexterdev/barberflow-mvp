@@ -232,6 +232,9 @@ function renderDashboard() {
 function renderAgenda() {
   const key = dateKey(state.selectedDate);
   const selectedProfessional = state.access.professionalName || state.agendaProfessional;
+  document.querySelector(".agenda-layout")?.classList.toggle("team-mode", selectedProfessional === "all");
+  $("#timeline").classList.toggle("team-timeline", selectedProfessional === "all");
+  if (selectedProfessional !== "all") $("#timeline").style.removeProperty("--team-columns");
   const items = state.appointments
     .filter(item => item.date === key && (selectedProfessional === "all" || item.barber === selectedProfessional))
     .sort((a, b) => a.time.localeCompare(b.time));
@@ -241,6 +244,10 @@ function renderAgenda() {
   const times = [...new Set([...getBookableTimes(key), ...items.map(item => item.time)])].sort();
   if (!times.length) {
     $("#timeline").innerHTML = `<div class="empty-exceptions">Não há atendimento programado para este dia.</div>`;
+    return;
+  }
+  if (selectedProfessional === "all") {
+    renderAllProfessionalsAgenda(times, items);
     return;
   }
   $("#timeline").innerHTML = times.map(time => {
@@ -263,6 +270,47 @@ function renderAgenda() {
   }).join("");
 }
 
+function renderAllProfessionalsAgenda(times, items) {
+  const professionals = state.professionals.filter(item => item.active);
+  $("#timeline").classList.add("team-timeline");
+  $("#timeline").style.setProperty("--team-columns", professionals.length);
+  const header = `
+    <div class="team-grid team-grid-header">
+      <div class="team-time-header">HORÁRIO</div>
+      ${professionals.map(professional => `
+        <div class="team-professional-head" style="--professional-color:${professional.color}">
+          <span>${initials(professional.name)}</span>
+          <div><strong>${professional.name}</strong><small>${professional.specialty}</small></div>
+        </div>`).join("")}
+    </div>`;
+  const rows = times.map(time => `
+    <div class="team-grid team-grid-row">
+      <div class="team-time">${time}</div>
+      ${professionals.map(professional => {
+        const item = items.find(appointment => appointment.time === time && appointment.barber === professional.name);
+        const coveringItem = items.find(appointment =>
+          appointment.barber === professional.name &&
+          timeToMinutes(time) > timeToMinutes(appointment.time) &&
+          timeToMinutes(time) < timeToMinutes(appointment.time) + getAppointmentDuration(appointment)
+        );
+        if (item) return `
+          <div class="team-cell">
+            <div class="team-booking ${item.status === "aguardando" ? "pending" : ""}" style="--professional-color:${professional.color}" draggable="true" data-appointment-id="${item.id}" title="Arraste para alterar o horário">
+              <strong>${item.name}</strong>
+              <small>${item.service} · ${getAppointmentDuration(item)} min</small>
+              <button class="send-reminder" data-id="${item.id}" title="Enviar pelo WhatsApp">◉</button>
+            </div>
+          </div>`;
+        if (coveringItem) return `
+          <div class="team-cell">
+            <div class="team-continuation" style="--professional-color:${professional.color}">Em atendimento até ${minutesToTime(timeToMinutes(coveringItem.time) + getAppointmentDuration(coveringItem))}</div>
+          </div>`;
+        return `<div class="team-cell"><div class="team-free">Livre</div></div>`;
+      }).join("")}
+    </div>`).join("");
+  $("#timeline").innerHTML = header + rows;
+}
+
 function renderAgendaProfessionalFilter() {
   const select = $("#agendaProfessional");
   const activeProfessionals = state.professionals.filter(item => item.active);
@@ -278,6 +326,7 @@ function renderAgendaProfessionalFilter() {
     if (!activeProfessionals.some(item => item.name === state.agendaProfessional)) state.agendaProfessional = "all";
     select.value = state.agendaProfessional;
   }
+  $("#timeline").classList.toggle("team-timeline", !state.access.professionalName && state.agendaProfessional === "all");
 }
 
 function applyAccess(access = {}) {
