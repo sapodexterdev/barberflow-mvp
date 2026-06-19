@@ -389,3 +389,223 @@ form input:focus, form select:focus, form textarea:focus { border-color: #82ad91
   .weekly-row { grid-template-columns: 90px 1fr; }.weekly-times input { width: 92px; }
 }
 @media (max-width: 440px) { .metric-grid { grid-template-columns: 1fr; }.metric-card { min-height: auto; }.metric-icon { margin-bottom: 12px; }.form-row { grid-template-columns: 1fr; gap: 0; } }
+
+/* Experiência mobile */
+@media (max-width: 760px) {
+  body { background: #313132; }
+  main { padding: 0 18px 80px; overflow-x: hidden; }
+
+  .topbar {
+    min-height: 92px;
+    padding: 14px 0 8px;
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) 48px;
+    gap: 12px;
+    align-items: center;
+  }
+  .mobile-menu {
+    width: 44px;
+    height: 44px;
+    color: #313132;
+    border: 0;
+    border-radius: 14px;
+    background: #f6eedf;
+    box-shadow: 0 8px 22px rgba(0,0,0,.16);
+  }
+  .topbar > div:nth-child(2) { min-width: 0; }
+  .topbar .eyebrow {
+    margin-bottom: 4px;
+    overflow: hidden;
+    font-size: 8px;
+    letter-spacing: 1.2px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .topbar h1 {
+    overflow: hidden;
+    font-size: 24px;
+    line-height: 1.08;
+    letter-spacing: -.8px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .top-actions { display: contents; }
+  .top-actions .primary-button {
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    border-radius: 15px;
+    font-size: 0;
+    box-shadow: 0 10px 24px rgba(223,138,56,.26);
+  }
+  .top-actions .primary-button::before {
+    content: "+";
+    color: #313132;
+    font-size: 26px;
+    font-weight: 400;
+  }
+  .top-actions .primary-button span { display: none; }
+
+  .section-toolbar {
+    min-height: 0;
+    padding: 18px 0 14px;
+    display: block;
+  }
+  .section-toolbar > div:first-child { margin-bottom: 14px; }
+  .section-toolbar h2 {
+    font-size: 25px;
+    line-height: 1.1;
+    letter-spacing: -.7px;
+  }
+  .section-toolbar .eyebrow { margin-bottom: 5px; }
+  .agenda-filters {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .agenda-filters > label {
+    display: grid;
+    gap: 5px;
+    font-size: 8px;
+  }
+  .agenda-filters select {
+    width: 100%;
+    min-width: 0;
+    height: 48px;
+    margin: 0;
+    padding: 0 14px;
+    border: 0;
+    border-radius: 14px;
+    font-size: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,.12);
+  }
+  .date-switcher {
+    width: 100%;
+    height: 48px;
+    border: 0;
+    border-radius: 14px;
+    box-shadow: 0 6px 20px rgba(0,0,0,.12);
+  }
+  .date-switcher > button { width: 44px; height: 46px; }
+  .date-switcher .date-picker-button { flex: 1; min-width: 0; font-size: 11px; }
+
+  .agenda-layout,
+  .agenda-layout.team-mode {
+    display: block;
+  }
+  .timeline {
+    border: 0;
+    border-radius: 18px;
+    background: transparent;
+    overflow: visible;
+  }
+  .day-summary { display: none !important; }
+
+  .mobile-team-timeline {
+    display: grid;
+    gap: 12px;
+  }
+  .mobile-time-group {
+    overflow: hidden;
+    border: 1px solid rgba(224,199,170,.55);
+    border-radius: 17px;
+    background: #f6eedf;
+    box-shadow: 0 8px 24px rgba(0,0,0,.10);
+  }
+  .mobile-time-head {
+    min-height: 42px;
+    padding: 10px 13px;
+    border-bottom: 1px solid #ead8c5;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .mobile-time-head strong { color: #313132; font: 800 15px Manrope; }
+  .mobile-time-head span { color: #93765e; font-size: 9px; }
+  .mobile-time-cards { padding: 9px; display: grid; gap: 8px; }
+  .mobile-team-booking {
+    position: relative;
+    min-height: 74px;
+    padding: 12px 42px 12px 12px;
+    border-left: 4px solid var(--professional-color);
+    border-radius: 13px;
+    color: #313132;
+    background: #fffaf2;
+    display: grid;
+    grid-template-columns: 38px minmax(0, 1fr);
+    gap: 11px;
+    align-items: center;
+  }
+  .mobile-team-booking.pending { background: #fff0d8; }
+  .mobile-professional-mark {
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    color: #fff8eb;
+    background: var(--professional-color);
+    display: grid;
+    place-items: center;
+    font-size: 10px;
+    font-weight: 800;
+  }
+  .mobile-booking-copy { min-width: 0; }
+  .mobile-booking-copy span,
+  .mobile-booking-copy strong,
+  .mobile-booking-copy small { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mobile-booking-copy span { margin-bottom: 2px; color: #93765e; font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; }
+  .mobile-booking-copy strong { font-size: 12px; }
+  .mobile-booking-copy small { margin-top: 4px; color: #85776b; font-size: 9px; }
+  .mobile-team-booking > button {
+    position: absolute;
+    top: 25px;
+    right: 12px;
+    border: 0;
+    color: #6d6259;
+    background: transparent;
+  }
+  .mobile-empty-agenda {
+    min-height: 190px;
+    border: 1px dashed rgba(246,238,223,.28);
+    border-radius: 18px;
+    color: #e9d6b1;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 6px;
+  }
+  .mobile-empty-agenda > span { color: #df8a38; font-size: 22px; }
+  .mobile-empty-agenda strong { font-size: 13px; }
+  .mobile-empty-agenda small { color: #a99a8a; font-size: 10px; }
+
+  .timeline-row { min-height: 74px; grid-template-columns: 54px 1fr; }
+  .timeline-hour { padding: 15px 8px; }
+  .timeline-slot { padding: 7px; }
+  .timeline-booking, .empty-slot, .occupied-continuation { height: 60px; }
+
+  .metric-grid { gap: 10px; }
+  .metric-card { min-height: 132px; border-radius: 16px; }
+  .welcome-strip { border-radius: 16px; }
+  .panel, .table-card, .service-card, .professional-card { border-radius: 17px; }
+
+  .modal-backdrop { padding: 0; align-items: end; }
+  .modal {
+    width: 100%;
+    max-height: 92vh;
+    padding: 26px 20px calc(22px + env(safe-area-inset-bottom));
+    border-radius: 24px 24px 0 0;
+  }
+  .toast {
+    right: 12px;
+    bottom: calc(12px + env(safe-area-inset-bottom));
+    left: 12px;
+    min-width: 0;
+  }
+}
+
+@media (max-width: 390px) {
+  main { padding-inline: 14px; }
+  .metric-grid { grid-template-columns: 1fr; }
+  .metric-card { min-height: 112px; }
+  .form-row { grid-template-columns: 1fr; gap: 0; }
+}

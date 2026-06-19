@@ -234,6 +234,7 @@ function renderAgenda() {
   const selectedProfessional = state.access.professionalName || state.agendaProfessional;
   document.querySelector(".agenda-layout")?.classList.toggle("team-mode", selectedProfessional === "all");
   $("#timeline").classList.toggle("team-timeline", selectedProfessional === "all");
+  $("#timeline").classList.remove("mobile-team-timeline");
   if (selectedProfessional !== "all") $("#timeline").style.removeProperty("--team-columns");
   const items = state.appointments
     .filter(item => item.date === key && (selectedProfessional === "all" || item.barber === selectedProfessional))
@@ -273,6 +274,10 @@ function renderAgenda() {
 
 function renderAllProfessionalsAgenda(times, items) {
   const professionals = state.professionals.filter(item => item.active);
+  if (window.matchMedia("(max-width: 760px)").matches) {
+    renderMobileTeamAgenda(times, items, professionals);
+    return;
+  }
   $("#timeline").classList.add("team-timeline");
   $("#timeline").style.setProperty("--team-columns", professionals.length);
   const header = `
@@ -310,6 +315,42 @@ function renderAllProfessionalsAgenda(times, items) {
       }).join("")}
     </div>`).join("");
   $("#timeline").innerHTML = header + rows;
+}
+
+function renderMobileTeamAgenda(times, items, professionals) {
+  $("#timeline").classList.add("mobile-team-timeline");
+  $("#timeline").style.removeProperty("--team-columns");
+  const occupiedTimes = times.filter(time =>
+    items.some(appointment => appointment.time === time)
+  );
+  $("#timeline").innerHTML = occupiedTimes.length ? occupiedTimes.map(time => {
+    const startingItems = items.filter(appointment => appointment.time === time);
+    return `
+      <section class="mobile-time-group">
+        <div class="mobile-time-head">
+          <strong>${time}</strong>
+          <span>${startingItems.length} ${startingItems.length === 1 ? "atendimento" : "atendimentos"}</span>
+        </div>
+        <div class="mobile-time-cards">
+          ${startingItems.map(item => {
+            const professional = professionals.find(person => person.name === item.barber);
+            return `
+              <article class="mobile-team-booking ${item.status === "aguardando" ? "pending" : ""}" style="--professional-color:${professionalColor(professional?.color)}">
+                <div class="mobile-professional-mark">${initials(item.barber)}</div>
+                <div class="mobile-booking-copy">
+                  <span>${item.barber}</span>
+                  <strong>${item.name}</strong>
+                  <small>${item.service} · ${getAppointmentDuration(item)} min · ${money(item.price)}</small>
+                </div>
+                <button class="send-reminder" data-id="${item.id}" aria-label="Enviar lembrete pelo WhatsApp">◉</button>
+              </article>`;
+          }).join("")}
+        </div>
+      </section>`;
+  }).join("") : `
+    <div class="mobile-empty-agenda">
+      <span>✦</span><strong>Agenda livre neste dia</strong><small>Nenhum atendimento marcado.</small>
+    </div>`;
 }
 
 function renderAgendaProfessionalFilter() {
@@ -931,6 +972,13 @@ $("#agendaDatePicker").addEventListener("change", event => {
 $("#agendaProfessional").addEventListener("change", event => {
   state.agendaProfessional = event.target.value;
   renderAgenda();
+});
+let resizeAgendaTimer;
+window.addEventListener("resize", () => {
+  clearTimeout(resizeAgendaTimer);
+  resizeAgendaTimer = setTimeout(() => {
+    if ($("#agenda").classList.contains("active")) renderAgenda();
+  }, 120);
 });
 
 $("#timeline").addEventListener("click", event => {
