@@ -110,7 +110,7 @@
             <div class="panel-head"><div><span>ATALHOS</span><h2>Resolva rapidinho</h2></div></div>
             <div class="quick-grid">
               <button data-open-booking><i class="quick-icon">＋</i><span><strong>Agendar horário</strong><small>Adicione em poucos passos</small></span><b>›</b></button>
-              <button data-view-target="clientes"><i class="quick-icon">♙</i><span><strong>Novo cliente</strong><small>Cadastre nome e WhatsApp</small></span><b>›</b></button>
+              <button data-open-client><i class="quick-icon">♙</i><span><strong>Novo cliente</strong><small>Cadastre nome e WhatsApp</small></span><b>›</b></button>
               <button id="shareLink"><i class="quick-icon">↗</i><span><strong>Compartilhar agenda</strong><small>Envie seu link pelo WhatsApp</small></span><b>›</b></button>
               <button data-view-target="servicos"><i class="quick-icon">✂</i><span><strong>Editar serviços</strong><small>Preços e duração</small></span><b>›</b></button>
             </div>
@@ -373,6 +373,48 @@
         <div class="service-form-actions">
           <button class="secondary-button" type="button" data-cancel-professional>Cancelar</button>
           <button class="primary-button" type="submit" id="saveProfessional">Cadastrar profissional</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="clientModal" aria-hidden="true">
+    <div class="modal client-create-modal">
+      <button class="modal-close" data-close-client-modal>×</button>
+      <div class="client-create-head">
+        <div class="client-avatar-preview" id="clientAvatarPreview">NC</div>
+        <div>
+          <p class="eyebrow">NOVO CLIENTE</p>
+          <h2>Quem chegou na barbearia?</h2>
+          <p class="modal-subtitle">Cadastre uma vez e agilize todos os próximos agendamentos.</p>
+        </div>
+      </div>
+      <form id="clientForm">
+        <label>Nome completo<input name="name" placeholder="Ex.: Lucas Ferreira" required maxlength="80"></label>
+        <div class="form-row">
+          <label>WhatsApp<input name="phone" placeholder="(31) 99999-9999" inputmode="tel" required></label>
+          <label>Aniversário <span class="optional">opcional</span><input name="birthday" type="date"></label>
+        </div>
+        <label>Como conheceu a barbearia?
+          <select name="source">
+            <option value="">Não informado</option>
+            <option>Indicação de amigo</option>
+            <option>Instagram</option>
+            <option>Google</option>
+            <option>Passou em frente</option>
+            <option>WhatsApp</option>
+          </select>
+        </label>
+        <label>Observações <span class="optional">opcional</span>
+          <textarea name="notes" placeholder="Preferências de corte, alergias ou outro detalhe importante." maxlength="300"></textarea>
+        </label>
+        <label class="permission-check">
+          <input name="marketing" type="checkbox" checked>
+          <span><strong>Aceita receber novidades pelo WhatsApp</strong><small>Promoções, lembretes e avisos da barbearia.</small></span>
+        </label>
+        <div class="service-form-actions">
+          <button class="secondary-button" type="button" data-cancel-client>Cancelar</button>
+          <button class="primary-button" type="submit">＋ Cadastrar cliente</button>
         </div>
       </form>
     </div>

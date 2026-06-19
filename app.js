@@ -499,6 +499,51 @@ function closeProfessionalEditor() {
   $("#professionalModal").setAttribute("aria-hidden", "true");
 }
 
+function openClientEditor() {
+  const form = $("#clientForm");
+  form.reset();
+  form.elements.marketing.checked = true;
+  $("#clientAvatarPreview").textContent = "NC";
+  $("#clientModal").classList.add("open");
+  $("#clientModal").setAttribute("aria-hidden", "false");
+  setTimeout(() => form.elements.name.focus(), 100);
+}
+
+function closeClientEditor() {
+  $("#clientModal").classList.remove("open");
+  $("#clientModal").setAttribute("aria-hidden", "true");
+}
+
+function saveClientData(event) {
+  event.preventDefault();
+  const data = new FormData(event.currentTarget);
+  const phone = sanitizePhone(data.get("phone"));
+  const name = data.get("name").trim();
+  if (phone.length < 10) {
+    showToast("WhatsApp incompleto", "Informe o DDD e o número do cliente.");
+    return;
+  }
+  if (state.clients.some(client => sanitizePhone(client.phone) === phone)) {
+    showToast("Cliente já cadastrado", "Já existe um cliente com este WhatsApp.");
+    return;
+  }
+  state.clients.unshift({
+    name,
+    phone,
+    birthday: data.get("birthday") || "",
+    source: data.get("source") || "",
+    notes: data.get("notes").trim(),
+    marketing: data.get("marketing") === "on",
+    visits: 0,
+    last: "Novo cliente"
+  });
+  persist();
+  renderClients();
+  renderBookingClients();
+  closeClientEditor();
+  showToast("Cliente cadastrado", `${name} já pode ser selecionado nos agendamentos.`);
+}
+
 function saveProfessionalData(event) {
   event.preventDefault();
   const data = new FormData(event.currentTarget);
@@ -660,6 +705,7 @@ document.addEventListener("click", event => {
 $("#serviceForm").addEventListener("submit", saveService);
 $("#newServiceForm").addEventListener("submit", createService);
 $("#professionalForm").addEventListener("submit", saveProfessionalData);
+$("#clientForm").addEventListener("submit", saveClientData);
 $("#specialWindowForm").addEventListener("submit", saveSpecialWindow);
 $("#serviceModal").addEventListener("click", event => { if (event.target === event.currentTarget) closeServiceEditor(); });
 $("#newServiceModal").addEventListener("click", event => { if (event.target === event.currentTarget) closeNewService(); });
@@ -669,6 +715,12 @@ $("[data-cancel-new-service]").addEventListener("click", closeNewService);
 $("#professionalModal").addEventListener("click", event => { if (event.target === event.currentTarget) closeProfessionalEditor(); });
 $("[data-close-professional-modal]").addEventListener("click", closeProfessionalEditor);
 $("[data-cancel-professional]").addEventListener("click", closeProfessionalEditor);
+$("#clientModal").addEventListener("click", event => { if (event.target === event.currentTarget) closeClientEditor(); });
+$("[data-close-client-modal]").addEventListener("click", closeClientEditor);
+$("[data-cancel-client]").addEventListener("click", closeClientEditor);
+$("#clientForm").elements.name.addEventListener("input", event => {
+  $("#clientAvatarPreview").textContent = initials(event.target.value || "Novo Cliente");
+});
 $("#professionalForm").elements.name.addEventListener("input", updateProfessionalPreview);
 $$('#professionalForm input[name="color"]').forEach(input => input.addEventListener("change", updateProfessionalPreview));
 $("#saveSchedule").addEventListener("click", saveWeeklySchedule);
@@ -723,14 +775,8 @@ $("#saveWhatsapp").addEventListener("click", () => {
   showToast("WhatsApp configurado", "Número salvo. As mensagens inteligentes estão prontas.");
 });
 
-$("#newClient").addEventListener("click", () => {
-  const name = prompt("Nome do cliente:");
-  if (!name) return;
-  const phone = prompt("WhatsApp do cliente:");
-  if (!phone) return;
-  state.clients.unshift({ name, phone: sanitizePhone(phone), visits: 0, last: "Novo cliente" });
-  persist(); renderClients(); showToast("Cliente cadastrado", `${name} entrou para sua lista.`);
-});
+$("#newClient").addEventListener("click", openClientEditor);
+$$("[data-open-client]").forEach(button => button.addEventListener("click", openClientEditor));
 
 $("#newService").addEventListener("click", openNewService);
 $("#newProfessional").addEventListener("click", () => openProfessionalEditor());
@@ -751,6 +797,7 @@ document.addEventListener("keydown", event => {
     closeServiceEditor();
     closeNewService();
     closeProfessionalEditor();
+    closeClientEditor();
   }
 });
 
