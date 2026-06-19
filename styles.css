@@ -18,6 +18,8 @@
 }
 * { box-sizing: border-box; }
 body { margin: 0; color: var(--ink); background: var(--paper); font-family: "DM Sans", sans-serif; }
+.icon-sprite { position: absolute; width: 0; height: 0; overflow: hidden; }
+.ui-icon { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 button, input, select { font: inherit; }
 button { cursor: pointer; }
 .shell { min-height: 100vh; display: grid; grid-template-columns: 255px 1fr; }
@@ -32,9 +34,11 @@ button { cursor: pointer; }
 .nav { display: grid; gap: 6px; }
 .nav-item { width: 100%; padding: 12px 13px; border: 0; border-radius: 10px; color: #969b90; background: transparent; display: flex; align-items: center; gap: 12px; text-align: left; font-weight: 600; transition: .2s; }
 .nav-item span { width: 19px; color: #b8bcb2; font-size: 18px; text-align: center; }
+.nav-item .ui-icon { flex: 0 0 19px; color: #d6c3aa; }
 .nav-item b { margin-left: auto; min-width: 22px; padding: 3px 6px; border-radius: 12px; color: #161812; background: var(--lime); font-size: 11px; text-align: center; }
 .nav-item:hover, .nav-item.active { color: #fff8eb; background: #474544; }
 .nav-item.active span { color: var(--lime); }
+.nav-item.active .ui-icon { color: var(--orange); }
 .sidebar-bottom { margin-top: auto; }
 .plan-card { margin: 12px 0; padding: 16px; border: 1px solid #5a5652; border-radius: 13px; background: #3a3939; }
 .plan-card span, .panel-head span, .metric-card > span, .day-summary > span, .integration-card span, .automation-card > span { color: #8a8f83; font-size: 10px; font-weight: 700; letter-spacing: 1px; }
@@ -49,7 +53,7 @@ button { cursor: pointer; }
 .profile span { margin-top: 2px; color: #7e8379; font-size: 10px; }
 .profile button { border: 0; color: #7e8379; background: transparent; }
 .logout-button[hidden] { display: none; }
-main { min-width: 0; padding: 0 4vw 55px; }
+main { min-width: 0; min-height: 100vh; padding: 0 4vw 55px; color: #f6eedf; background: #313132; }
 .topbar { min-height: 120px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
 .eyebrow { margin: 0 0 7px; color: #7d8276; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; }
 h1, h2 { font-family: Manrope, sans-serif; }
@@ -67,6 +71,22 @@ h1 span { font-size: .75em; }
 .mobile-menu { display: none; }
 .view { display: none; animation: fade .25s ease; }
 .view.active { display: block; }
+.view > .section-toolbar h2, .topbar h1 { color: #f6eedf; }
+.topbar .eyebrow, .view > .section-toolbar .eyebrow { color: #e0a775; }
+.topbar { color: #f6eedf; }
+.metric-card, .panel, .timeline, .day-summary, .table-card, .service-card, .professional-card { color: var(--ink); background: #f6eedf; }
+.metric-card, .panel, .timeline, .day-summary, .table-card, .service-card, .professional-card { border-color: #e0c7aa; }
+.section-toolbar .primary-button, .topbar .primary-button { color: #313132; background: #df8a38; box-shadow: 0 8px 20px rgba(223,138,56,.22); }
+.section-toolbar .primary-button:hover, .topbar .primary-button:hover { background: #eba159; }
+.agenda-filters > label { color: #e9d6b1; }
+.agenda-filters select, .date-switcher, .icon-button, .mobile-menu { color: #313132; background: #f6eedf; border-color: #d7b793; }
+.welcome-strip { color: #313132; }
+.quick-grid button, .panel-head { background: #f6eedf; }
+.team-grid-header { background: #ead6b8; }
+.team-grid-row, .timeline-row { background: #f6eedf; }
+.table-tools input { background: #fffaf2; }
+.cloud-status { color: #f6eedf; background: #595652; }
+.cloud-status.online { color: #313132; background: #df8a38; }
 @keyframes fade { from { opacity: .3; transform: translateY(4px); } }
 .welcome-strip { min-height: 73px; margin-bottom: 17px; padding: 17px 20px; border: 1px solid #e8c9a8; border-radius: 14px; background: linear-gradient(100deg, #f4dfc4, #fff5e8); display: flex; justify-content: space-between; align-items: center; }
 .welcome-strip strong { font-size: 13px; }
@@ -79,6 +99,7 @@ h1 span { font-size: .75em; }
 .metric-link:hover { transform: translateY(-3px); border-color: #cdd8c8; box-shadow: 0 12px 28px rgba(25, 34, 22, .08); }
 .metric-link:focus-visible { outline: 3px solid rgba(31, 91, 66, .22); outline-offset: 3px; }
 .metric-icon { width: 34px; height: 34px; margin-bottom: 18px; border-radius: 9px; display: grid; place-items: center; font-size: 14px; font-weight: 700; }
+.metric-icon .ui-icon { width: 17px; height: 17px; }
 .green { color: #6e431f; background: var(--soft-green); }.gold { color: var(--gold); background: var(--soft-gold); }.blue { color: var(--blue); background: var(--soft-blue); }.whatsapp { color: #fff8eb; background: #595652; }
 .metric-card > span { display: block; margin-bottom: 5px; }
 .metric-card > strong { display: block; font: 800 25px Manrope; letter-spacing: -1px; }
@@ -105,6 +126,7 @@ h1 span { font-size: .75em; }
 .quick-grid button:hover { background: #fbfcf8; }
 .quick-grid button:nth-child(even) { border-right: 0; }
 .quick-icon { width: 29px; height: 29px; border-radius: 8px; color: #8d4f20; background: #f5dfc5; display: grid; place-items: center; font-size: 16px; font-style: normal; }
+.quick-icon .ui-icon { width: 15px; height: 15px; }
 .quick-grid strong, .quick-grid small { display: block; }
 .quick-grid strong { font-size: 11px; }.quick-grid small { margin-top: 4px; color: #979a94; font-size: 9px; }.quick-grid b { color: #a0a49c; }
 .tip { margin: 15px; padding: 12px; border-radius: 10px; background: #f4f6ef; display: flex; gap: 10px; align-items: center; }
@@ -326,6 +348,33 @@ form input:focus, form select:focus, form textarea:focus { border-color: #82ad91
 .resend-form label { margin-bottom: 10px; }
 .resend-form > div { display: flex; justify-content: flex-end; gap: 8px; }
 .resend-form .primary-button, .resend-form .secondary-button { padding: 10px 12px; font-size: 10px; }
+
+/* Tema Clube da Régua: carvão, creme e laranja queimado */
+.metric-card,
+.panel,
+.timeline,
+.day-summary,
+.table-card,
+.service-card,
+.professional-card,
+.quick-grid button,
+.panel-head,
+.team-grid-row {
+  background: #f6eedf;
+}
+.metric-card,
+.panel,
+.timeline,
+.day-summary,
+.table-card,
+.service-card,
+.professional-card {
+  border-color: #e0c7aa;
+}
+.auth-card,
+.modal {
+  background: #f6eedf;
+}
 @media (max-width: 1050px) { .metric-grid { grid-template-columns: 1fr 1fr; }.dashboard-grid { grid-template-columns: 1fr; }.service-grid, .professional-grid { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 760px) {
   .shell { display: block; }.sidebar { position: fixed; left: -270px; width: 255px; transition: .25s; }.sidebar.open { left: 0; box-shadow: 20px 0 50px rgba(0,0,0,.28); }
