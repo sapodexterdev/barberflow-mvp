@@ -126,7 +126,14 @@
             <label id="agendaProfessionalFilter">Profissional
               <select id="agendaProfessional"></select>
             </label>
-            <div class="date-switcher"><button id="prevDay">‹</button><strong id="agendaDate"></strong><button id="nextDay">›</button></div>
+            <div class="date-switcher">
+              <button id="prevDay" aria-label="Dia anterior">‹</button>
+              <button class="date-picker-button" id="openAgendaDate" type="button" aria-label="Escolher uma data">
+                <strong id="agendaDate"></strong><span>▦</span>
+              </button>
+              <input class="hidden-date-picker" id="agendaDatePicker" type="date" aria-label="Data da agenda">
+              <button id="nextDay" aria-label="Próximo dia">›</button>
+            </div>
           </div>
         </div>
         <div class="agenda-layout">

@@ -239,6 +239,7 @@ function renderAgenda() {
     .filter(item => item.date === key && (selectedProfessional === "all" || item.barber === selectedProfessional))
     .sort((a, b) => a.time.localeCompare(b.time));
   $("#agendaDate").textContent = brDate(state.selectedDate, { weekday: "short", day: "2-digit", month: "short" }).replace(".", "");
+  $("#agendaDatePicker").value = key;
   $("#summaryCount").textContent = items.length;
   $("#summaryRevenue").textContent = money(items.reduce((sum, item) => sum + item.price, 0));
   const times = [...new Set([...getBookableTimes(key), ...items.map(item => item.time)])].sort();
@@ -906,6 +907,16 @@ $(".sidebar-overlay").addEventListener("click", () => $(".sidebar").classList.re
 $("#clientSearch").addEventListener("input", event => renderClients(event.target.value));
 $("#prevDay").addEventListener("click", () => { state.selectedDate = new Date(state.selectedDate.getTime() - DAY); renderAgenda(); });
 $("#nextDay").addEventListener("click", () => { state.selectedDate = new Date(state.selectedDate.getTime() + DAY); renderAgenda(); });
+$("#openAgendaDate").addEventListener("click", () => {
+  const picker = $("#agendaDatePicker");
+  if (typeof picker.showPicker === "function") picker.showPicker();
+  else picker.click();
+});
+$("#agendaDatePicker").addEventListener("change", event => {
+  if (!event.target.value) return;
+  state.selectedDate = parseLocalDate(event.target.value);
+  renderAgenda();
+});
 $("#agendaProfessional").addEventListener("change", event => {
   state.agendaProfessional = event.target.value;
   renderAgenda();

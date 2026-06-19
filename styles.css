@@ -114,6 +114,11 @@ h1 span { font-size: .75em; }
 .agenda-filters select { min-width: 175px; margin-top: 5px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; color: #343831; background: white; font-size: 11px; font-weight: 600; }
 .date-switcher button { width: 38px; height: 38px; border: 0; background: transparent; font-size: 20px; }
 .date-switcher strong { min-width: 160px; text-align: center; font-size: 12px; }
+.date-switcher .date-picker-button { width: auto; min-width: 190px; padding: 0 12px; display: flex; gap: 8px; align-items: center; justify-content: center; }
+.date-picker-button strong { min-width: 0; }
+.date-picker-button span { color: var(--green); font-size: 13px; opacity: .7; }
+.date-picker-button:hover { color: var(--green); background: #f5f9f4; }
+.hidden-date-picker { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 .agenda-layout { display: grid; grid-template-columns: 1fr 220px; gap: 16px; }
 .agenda-layout.team-mode { grid-template-columns: minmax(0, 1fr); }
 .agenda-layout.team-mode .day-summary { display: none; }
@@ -327,7 +332,7 @@ form input:focus, form select:focus, form textarea:focus { border-color: #82ad91
   .metric-grid { grid-template-columns: 1fr 1fr; }.metric-card { min-height: 145px; padding: 15px; }.metric-card > strong { font-size: 20px; }.dashboard-grid { grid-template-columns: 1fr; }.quick-grid { grid-template-columns: 1fr; }.quick-grid button { border-right: 0; }
   .agenda-layout, .settings-grid, .schedule-settings-grid { grid-template-columns: 1fr; }.day-summary { display: grid; grid-template-columns: repeat(2, 1fr); }.day-summary > span, .day-summary hr, .day-summary p { display: none; }
   .service-grid, .professional-grid { grid-template-columns: 1fr; }.client-row { grid-template-columns: 40px 1fr auto; }.client-row > div:nth-child(3), .client-row > div:nth-child(4) { display: none; }
-  .section-toolbar { gap: 12px; }.agenda-filters { width: 100%; flex-direction: column; align-items: stretch; }.agenda-filters select { width: 100%; }.date-switcher { justify-content: space-between; }.date-switcher strong { min-width: 115px; }.modal { padding: 25px 20px; }
+  .section-toolbar { gap: 12px; }.agenda-filters { width: 100%; flex-direction: column; align-items: stretch; }.agenda-filters select { width: 100%; }.date-switcher { justify-content: space-between; }.date-switcher .date-picker-button { min-width: 145px; }.date-switcher strong { min-width: 0; }.modal { padding: 25px 20px; }
   .weekly-row { grid-template-columns: 90px 1fr; }.weekly-times input { width: 92px; }
 }
 @media (max-width: 440px) { .metric-grid { grid-template-columns: 1fr; }.metric-card { min-height: auto; }.metric-icon { margin-bottom: 12px; }.form-row { grid-template-columns: 1fr; gap: 0; } }
