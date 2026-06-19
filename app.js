@@ -164,7 +164,10 @@ function getBookableTimes(dateValue) {
   const end = timeToMinutes(window.end);
   const times = [];
   for (let minute = start; minute < end; minute += 30) times.push(minutesToTime(minute));
-  return times;
+  if (dateValue !== dateKey(new Date())) return times;
+  const now = new Date();
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+  return times.filter(time => timeToMinutes(time) > currentMinutes);
 }
 
 function renderDashboard() {
