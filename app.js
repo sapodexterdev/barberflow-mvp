@@ -170,6 +170,40 @@ function getBookableTimes(dateValue) {
   return times.filter(time => timeToMinutes(time) > currentMinutes);
 }
 
+function getAppointmentDuration(appointment) {
+  if (Number(appointment.duration) > 0) return Number(appointment.duration);
+  return Number(state.services.find(service => service.name === appointment.service)?.duration || 30);
+}
+
+function intervalsOverlap(startA, durationA, startB, durationB) {
+  const aStart = timeToMinutes(startA);
+  const aEnd = aStart + Number(durationA);
+  const bStart = timeToMinutes(startB);
+  const bEnd = bStart + Number(durationB);
+  return aStart < bEnd && bStart < aEnd;
+}
+
+function isAppointmentTimeAvailable(date, barber, startTime, duration, ignoreAppointmentId = null) {
+  const operatingWindow = getOperatingWindow(date);
+  if (!operatingWindow) return false;
+  const proposedEnd = timeToMinutes(startTime) + Number(duration);
+  if (timeToMinutes(startTime) < timeToMinutes(operatingWindow.start) || proposedEnd > timeToMinutes(operatingWindow.end)) {
+    return false;
+  }
+  return !state.appointments.some(item =>
+    item.id !== ignoreAppointmentId &&
+    item.date === date &&
+    item.barber === barber &&
+    intervalsOverlap(startTime, duration, item.time, getAppointmentDuration(item))
+  );
+}
+
+function getAvailableStartTimes(date, barber, duration, ignoreAppointmentId = null) {
+  return getBookableTimes(date).filter(time =>
+    isAppointmentTimeAvailable(date, barber, time, duration, ignoreAppointmentId)
+  );
+}
+
 function renderDashboard() {
   const items = todaysAppointments();
   const revenue = items.reduce((sum, item) => sum + item.price, 0);
@@ -203,25 +237,27 @@ function renderAgenda() {
   }
   $("#timeline").innerHTML = times.map(time => {
     const item = items.find(appt => appt.time === time);
+    const coveringItem = items.find(appt =>
+      appt.time !== time &&
+      timeToMinutes(time) > timeToMinutes(appt.time) &&
+      timeToMinutes(time) < timeToMinutes(appt.time) + getAppointmentDuration(appt)
+    );
     return `<div class="timeline-row"><div class="timeline-hour">${time}</div><div class="timeline-slot">${item ? `
       <div class="timeline-booking ${item.status === "aguardando" ? "pending" : ""}" draggable="true" data-appointment-id="${item.id}" title="Arraste para alterar o horário">
-        <div><strong>${item.name}</strong><small>${item.service} · ${money(item.price)}</small></div>
+        <div><strong>${item.name}</strong><small>${item.service} · ${getAppointmentDuration(item)} min · ${money(item.price)}</small></div>
         <button class="send-reminder" data-id="${item.id}" title="Enviar pelo WhatsApp">◉</button>
-      </div>` : `<button class="empty-slot" data-time="${time}" data-drop-time="${time}">＋ horário livre</button>`}</div></div>`;
+      </div>` : coveringItem ? `
+      <div class="occupied-continuation"><span>↳</span> ocupado por ${coveringItem.name} até ${minutesToTime(timeToMinutes(coveringItem.time) + getAppointmentDuration(coveringItem))}</div>` :
+      `<button class="empty-slot" data-time="${time}" data-drop-time="${time}">＋ horário livre</button>`}</div></div>`;
   }).join("");
 }
 
 function moveAppointment(appointmentId, newTime) {
   const appointment = state.appointments.find(item => item.id === Number(appointmentId));
   if (!appointment || appointment.time === newTime) return;
-  const conflict = state.appointments.some(item =>
-    item.id !== appointment.id &&
-    item.date === appointment.date &&
-    item.time === newTime &&
-    item.barber === appointment.barber
-  );
-  if (conflict) {
-    showToast("Horário ocupado", `${appointment.barber} já possui atendimento às ${newTime}.`);
+  const duration = getAppointmentDuration(appointment);
+  if (!isAppointmentTimeAvailable(appointment.date, appointment.barber, newTime, duration, appointment.id)) {
+    showToast("Horário indisponível", `Não há ${duration} minutos livres para ${appointment.barber} a partir de ${newTime}.`);
     return;
   }
   const previousTime = appointment.time;
@@ -433,12 +469,9 @@ function updateAvailableTimes(preferredTime = "") {
   const form = $("#bookingForm");
   const date = form.elements.date.value;
   const barber = form.elements.barber.value;
-  const occupiedTimes = new Set(
-    state.appointments
-      .filter(item => item.date === date && item.barber === barber)
-      .map(item => item.time)
-  );
-  const availableTimes = getBookableTimes(date).filter(time => !occupiedTimes.has(time));
+  const service = state.services.find(item => item.id === Number(form.elements.service.value));
+  const duration = Number(service?.duration || 30);
+  const availableTimes = getAvailableStartTimes(date, barber, duration);
   const timeSelect = form.elements.time;
 
   timeSelect.innerHTML = availableTimes.length
@@ -651,20 +684,15 @@ function book(event) {
     showToast("Escolha um cliente", "Selecione alguém cadastrado ou cadastre um novo cliente.");
     return;
   }
-  const occupied = state.appointments.some(item =>
-    item.date === data.get("date") &&
-    item.time === data.get("time") &&
-    item.barber === data.get("barber")
-  );
-  if (occupied) {
-    showToast("Horário indisponível", `${data.get("barber")} já possui um atendimento às ${data.get("time")}.`);
+  if (!isAppointmentTimeAvailable(data.get("date"), data.get("barber"), data.get("time"), service.duration)) {
+    showToast("Horário indisponível", `Não há ${service.duration} minutos livres para este serviço.`);
     return;
   }
   const appointment = {
     id: Date.now(),
     name: selectedClient?.name || data.get("name").trim(),
     phone: selectedClient ? sanitizePhone(selectedClient.phone) : sanitizePhone(data.get("phone")),
-    service: service.name, barber: data.get("barber"), date: data.get("date"), time: data.get("time"),
+    service: service.name, duration: service.duration, barber: data.get("barber"), date: data.get("date"), time: data.get("time"),
     price: service.price, status: "confirmado"
   };
   state.appointments.push(appointment);
@@ -767,6 +795,7 @@ $("#specialWindowsList").addEventListener("click", event => {
 });
 $("#bookingForm").elements.date.addEventListener("change", () => updateAvailableTimes());
 $("#bookingForm").elements.barber.addEventListener("change", () => updateAvailableTimes());
+$("#bookingForm").elements.service.addEventListener("change", () => updateAvailableTimes());
 $(".mobile-menu").addEventListener("click", () => $(".sidebar").classList.toggle("open"));
 $(".sidebar-overlay").addEventListener("click", () => $(".sidebar").classList.remove("open"));
 $("#clientSearch").addEventListener("input", event => renderClients(event.target.value));
