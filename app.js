@@ -193,7 +193,6 @@ function isAppointmentTimeAvailable(date, barber, startTime, duration, ignoreApp
   return !state.appointments.some(item =>
     item.id !== ignoreAppointmentId &&
     item.date === date &&
-    item.barber === barber &&
     intervalsOverlap(startTime, duration, item.time, getAppointmentDuration(item))
   );
 }
@@ -257,7 +256,7 @@ function moveAppointment(appointmentId, newTime) {
   if (!appointment || appointment.time === newTime) return;
   const duration = getAppointmentDuration(appointment);
   if (!isAppointmentTimeAvailable(appointment.date, appointment.barber, newTime, duration, appointment.id)) {
-    showToast("Horário indisponível", `Não há ${duration} minutos livres para ${appointment.barber} a partir de ${newTime}.`);
+    showToast("Horário indisponível", `Não há ${duration} minutos contínuos livres a partir de ${newTime}.`);
     return;
   }
   const previousTime = appointment.time;
@@ -685,7 +684,7 @@ function book(event) {
     return;
   }
   if (!isAppointmentTimeAvailable(data.get("date"), data.get("barber"), data.get("time"), service.duration)) {
-    showToast("Horário indisponível", `Não há ${service.duration} minutos livres para este serviço.`);
+    showToast("Horário indisponível", `Não há ${service.duration} minutos contínuos livres para este serviço.`);
     return;
   }
   const appointment = {
