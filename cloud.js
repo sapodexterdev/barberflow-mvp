@@ -44,6 +44,7 @@
   }
 
   async function ensureShop() {
+    await client.rpc("accept_staff_invite");
     const { data, error } = await client.rpc("get_my_barbershop_state");
     if (error) throw error;
     if (data?.length) return data[0];
@@ -61,6 +62,8 @@
   async function connectSession() {
     setSync("Sincronizando…", "syncing");
     const row = await ensureShop();
+    const accessResult = await client.rpc("get_my_access");
+    if (!accessResult.error && accessResult.data?.length) api.applyAccess?.(accessResult.data[0]);
     if (row?.data && Object.keys(row.data).length) api.applyState(row.data);
     ready = true;
     showAuth(false);
@@ -143,6 +146,15 @@
     setMessage("Novo e-mail enviado. Use o link mais recente.", "success");
   }
 
+  async function inviteProfessional(email, professionalName) {
+    if (!ready || !client) return;
+    const { error } = await client.rpc("invite_staff_member", {
+      staff_email: email,
+      staff_professional_name: professionalName
+    });
+    if (error) throw error;
+  }
+
   function queueSave(data) {
     if (!ready) return;
     setSync("Salvando…", "syncing");
@@ -162,5 +174,5 @@
     if (client) await client.auth.signOut();
   }
 
-  window.BarberCloud = { start, signIn, signUp, resendConfirmation, signOut, queueSave, translateError, configured };
+  window.BarberCloud = { start, signIn, signUp, resendConfirmation, inviteProfessional, signOut, queueSave, translateError, configured };
 })();

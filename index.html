@@ -122,7 +122,12 @@
       <section class="view" id="agenda">
         <div class="section-toolbar">
           <div><p class="eyebrow">ORGANIZAÇÃO DO DIA</p><h2>Sua agenda</h2></div>
-          <div class="date-switcher"><button id="prevDay">‹</button><strong id="agendaDate"></strong><button id="nextDay">›</button></div>
+          <div class="agenda-filters">
+            <label id="agendaProfessionalFilter">Profissional
+              <select id="agendaProfessional"></select>
+            </label>
+            <div class="date-switcher"><button id="prevDay">‹</button><strong id="agendaDate"></strong><button id="nextDay">›</button></div>
+          </div>
         </div>
         <div class="agenda-layout">
           <div class="timeline" id="timeline"></div>
@@ -346,6 +351,10 @@
           <label>WhatsApp<input name="phone" placeholder="(31) 99999-9999" inputmode="tel" required></label>
           <label>Especialidade<input name="specialty" placeholder="Ex.: Cortes e barba" required maxlength="60"></label>
         </div>
+        <label>E-mail de acesso <span class="optional">opcional</span>
+          <input name="accessEmail" type="email" placeholder="profissional@email.com">
+          <small class="field-help">Ao salvar, este e-mail poderá entrar e verá somente a própria agenda.</small>
+        </label>
         <div class="form-row">
           <label>Tempo médio por atendimento
             <select name="defaultDuration">

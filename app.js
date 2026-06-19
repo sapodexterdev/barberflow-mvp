@@ -54,6 +54,8 @@ const state = {
   specialWindows: JSON.parse(localStorage.getItem("bf_special_windows")) || [],
   appointments: JSON.parse(localStorage.getItem("bf_appointments")) || seedAppointments,
   selectedDate: new Date(today),
+  agendaProfessional: "all",
+  access: { role: "owner", professionalName: null },
   phone: localStorage.getItem("bf_phone") || "5531999999999"
 };
 let applyingCloudState = false;
@@ -132,7 +134,12 @@ function navigate(viewId) {
 }
 
 function todaysAppointments() {
-  return state.appointments.filter(item => item.date === dateKey(today)).sort((a, b) => a.time.localeCompare(b.time));
+  return state.appointments
+    .filter(item =>
+      item.date === dateKey(today) &&
+      (!state.access.professionalName || item.barber === state.access.professionalName)
+    )
+    .sort((a, b) => a.time.localeCompare(b.time));
 }
 
 function parseLocalDate(value) {
@@ -193,6 +200,7 @@ function isAppointmentTimeAvailable(date, barber, startTime, duration, ignoreApp
   return !state.appointments.some(item =>
     item.id !== ignoreAppointmentId &&
     item.date === date &&
+    item.barber === barber &&
     intervalsOverlap(startTime, duration, item.time, getAppointmentDuration(item))
   );
 }
@@ -223,8 +231,9 @@ function renderDashboard() {
 
 function renderAgenda() {
   const key = dateKey(state.selectedDate);
+  const selectedProfessional = state.access.professionalName || state.agendaProfessional;
   const items = state.appointments
-    .filter(item => item.date === key)
+    .filter(item => item.date === key && (selectedProfessional === "all" || item.barber === selectedProfessional))
     .sort((a, b) => a.time.localeCompare(b.time));
   $("#agendaDate").textContent = brDate(state.selectedDate, { weekday: "short", day: "2-digit", month: "short" }).replace(".", "");
   $("#summaryCount").textContent = items.length;
@@ -235,20 +244,58 @@ function renderAgenda() {
     return;
   }
   $("#timeline").innerHTML = times.map(time => {
-    const item = items.find(appt => appt.time === time);
-    const coveringItem = items.find(appt =>
+    const startingItems = items.filter(appt => appt.time === time);
+    const coveringItem = selectedProfessional === "all" ? null : items.find(appt =>
       appt.time !== time &&
       timeToMinutes(time) > timeToMinutes(appt.time) &&
       timeToMinutes(time) < timeToMinutes(appt.time) + getAppointmentDuration(appt)
     );
-    return `<div class="timeline-row"><div class="timeline-hour">${time}</div><div class="timeline-slot">${item ? `
+    const bookings = startingItems.map(item => `
       <div class="timeline-booking ${item.status === "aguardando" ? "pending" : ""}" draggable="true" data-appointment-id="${item.id}" title="Arraste para alterar o horário">
-        <div><strong>${item.name}</strong><small>${item.service} · ${getAppointmentDuration(item)} min · ${money(item.price)}</small></div>
+        <div><strong>${item.name}</strong><small>${item.service} · ${item.barber} · ${getAppointmentDuration(item)} min · ${money(item.price)}</small></div>
         <button class="send-reminder" data-id="${item.id}" title="Enviar pelo WhatsApp">◉</button>
-      </div>` : coveringItem ? `
+      </div>`).join("");
+    return `<div class="timeline-row"><div class="timeline-hour">${time}</div><div class="timeline-slot ${startingItems.length > 1 ? "multiple-bookings" : ""}">${startingItems.length ? bookings : coveringItem ? `
       <div class="occupied-continuation"><span>↳</span> ocupado por ${coveringItem.name} até ${minutesToTime(timeToMinutes(coveringItem.time) + getAppointmentDuration(coveringItem))}</div>` :
-      `<button class="empty-slot" data-time="${time}" data-drop-time="${time}">＋ horário livre</button>`}</div></div>`;
+      selectedProfessional === "all"
+        ? `<div class="all-professionals-empty">Sem início de atendimento</div>`
+        : `<button class="empty-slot" data-time="${time}" data-drop-time="${time}">＋ horário livre</button>`}</div></div>`;
   }).join("");
+}
+
+function renderAgendaProfessionalFilter() {
+  const select = $("#agendaProfessional");
+  const activeProfessionals = state.professionals.filter(item => item.active);
+  if (state.access.professionalName) {
+    state.agendaProfessional = state.access.professionalName;
+    select.innerHTML = `<option value="${state.access.professionalName}">${state.access.professionalName}</option>`;
+    select.disabled = true;
+    $("#agendaProfessionalFilter").title = "Profissional visualiza somente a própria agenda";
+  } else {
+    select.disabled = false;
+    select.innerHTML = `<option value="all">Todos os profissionais</option>` +
+      activeProfessionals.map(item => `<option value="${item.name}">${item.name}</option>`).join("");
+    if (!activeProfessionals.some(item => item.name === state.agendaProfessional)) state.agendaProfessional = "all";
+    select.value = state.agendaProfessional;
+  }
+}
+
+function applyAccess(access = {}) {
+  state.access = {
+    role: access.role || "owner",
+    professionalName: access.professional_name || access.professionalName || null
+  };
+  ["profissionais", "horarios", "configuracoes"].forEach(view => {
+    const navItem = document.querySelector(`[data-view="${view}"]`);
+    if (navItem) navItem.hidden = Boolean(state.access.professionalName);
+  });
+  if (state.access.professionalName && ["profissionais", "horarios", "configuracoes"].includes(document.querySelector(".view.active")?.id)) {
+    navigate("agenda");
+  }
+  renderAgendaProfessionalFilter();
+  renderProfessionals();
+  renderDashboard();
+  renderAgenda();
 }
 
 function moveAppointment(appointmentId, newTime) {
@@ -344,9 +391,12 @@ function renderProfessionals() {
   }).join("");
 
   const selected = $("#bookingBarber").value;
-  const activeProfessionals = state.professionals.filter(item => item.active);
+  const activeProfessionals = state.professionals.filter(item =>
+    item.active && (!state.access.professionalName || item.name === state.access.professionalName)
+  );
   $("#bookingBarber").innerHTML = activeProfessionals.map(item => `<option value="${item.name}">${item.name} · ${item.specialty}</option>`).join("");
   if (activeProfessionals.some(item => item.name === selected)) $("#bookingBarber").value = selected;
+  renderAgendaProfessionalFilter();
 }
 
 function renderScheduleSettings() {
@@ -536,6 +586,7 @@ function openProfessionalEditor(professionalId = "") {
   form.elements.name.value = professional?.name || "";
   form.elements.phone.value = professional?.phone || "";
   form.elements.specialty.value = professional?.specialty || "";
+  form.elements.accessEmail.value = professional?.accessEmail || "";
   form.elements.defaultDuration.value = String(professional?.defaultDuration || 40);
   form.elements.active.value = String(professional?.active ?? true);
   const color = professional?.color || "#2f8f63";
@@ -617,6 +668,7 @@ function saveProfessionalData(event) {
     name,
     phone: sanitizePhone(data.get("phone")),
     specialty: data.get("specialty").trim(),
+    accessEmail: data.get("accessEmail").trim().toLowerCase(),
     defaultDuration: Number(data.get("defaultDuration")),
     active: data.get("active") === "true",
     color: data.get("color")
@@ -627,6 +679,11 @@ function saveProfessionalData(event) {
     state.appointments.forEach(item => { if (item.barber === previousName) item.barber = name; });
   }
   persist();
+  if (values.accessEmail) {
+    window.BarberCloud?.inviteProfessional(values.accessEmail, values.name)
+      .then(() => showToast("Acesso preparado", `${values.accessEmail} poderá acessar a agenda de ${values.name}.`))
+      .catch(error => showToast("Profissional salvo", window.BarberCloud.translateError(error)));
+  }
   renderProfessionals();
   renderDashboard();
   renderAgenda();
@@ -800,6 +857,10 @@ $(".sidebar-overlay").addEventListener("click", () => $(".sidebar").classList.re
 $("#clientSearch").addEventListener("input", event => renderClients(event.target.value));
 $("#prevDay").addEventListener("click", () => { state.selectedDate = new Date(state.selectedDate.getTime() - DAY); renderAgenda(); });
 $("#nextDay").addEventListener("click", () => { state.selectedDate = new Date(state.selectedDate.getTime() + DAY); renderAgenda(); });
+$("#agendaProfessional").addEventListener("change", event => {
+  state.agendaProfessional = event.target.value;
+  renderAgenda();
+});
 
 $("#timeline").addEventListener("click", event => {
   const empty = event.target.closest(".empty-slot");
@@ -952,5 +1013,6 @@ $("#logoutButton").addEventListener("click", () => window.BarberCloud?.signOut()
 window.BarberCloud?.start({
   getState: exportState,
   applyState: applyCloudState,
+  applyAccess,
   notify: showToast
 });
