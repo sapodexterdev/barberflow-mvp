@@ -264,6 +264,7 @@ form input, form select { width: 100%; margin-top: 6px; padding: 12px; border: 1
 .auth-message { min-height: 18px; margin-top: 14px; color: #777d72; font-size: 10px; text-align: center; }
 .auth-message.error { color: #b14d4d; }
 .auth-message.success { color: #2f865a; }
+.resend-confirmation { width: 100%; padding: 9px; border: 0; color: var(--green); background: transparent; font-size: 10px; font-weight: 700; }
 @media (max-width: 1050px) { .metric-grid { grid-template-columns: 1fr 1fr; }.dashboard-grid { grid-template-columns: 1fr; }.service-grid, .professional-grid { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 760px) {
   .shell { display: block; }.sidebar { position: fixed; left: -270px; width: 255px; transition: .25s; }.sidebar.open { left: 0; box-shadow: 20px 0 50px rgba(0,0,0,.28); }

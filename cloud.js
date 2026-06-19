@@ -57,6 +57,13 @@
       return;
     }
     client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
+    const callbackError = new URLSearchParams(window.location.hash.slice(1)).get("error_description");
+    if (callbackError) {
+      showAuth(true);
+      setMessage("O link de confirmação expirou. Solicite um novo e-mail abaixo.", "error");
+      document.querySelector("#resendConfirmation")?.removeAttribute("hidden");
+      history.replaceState({}, document.title, window.location.pathname);
+    }
     const { data } = await client.auth.getSession();
     if (data.session) {
       try {
@@ -95,12 +102,28 @@
 
   async function signUp(email, password, shopName) {
     localStorage.setItem("bf_shop_name", shopName);
+    localStorage.setItem("bf_pending_email", email);
     setMessage("Criando sua conta…");
-    const { data, error } = await client.auth.signUp({ email, password });
+    const { data, error } = await client.auth.signUp({
+      email,
+      password,
+      options: { emailRedirectTo: `${window.location.origin}/` }
+    });
     if (error) throw error;
     if (!data.session) {
       setMessage("Conta criada. Confirme o e-mail para entrar.", "success");
+      document.querySelector("#resendConfirmation")?.removeAttribute("hidden");
     }
+  }
+
+  async function resendConfirmation(email) {
+    const { error } = await client.auth.resend({
+      type: "signup",
+      email,
+      options: { emailRedirectTo: `${window.location.origin}/` }
+    });
+    if (error) throw error;
+    setMessage("Novo e-mail enviado. Use o link mais recente.", "success");
   }
 
   function queueSave(data) {
@@ -122,5 +145,5 @@
     if (client) await client.auth.signOut();
   }
 
-  window.BarberCloud = { start, signIn, signUp, signOut, queueSave, configured };
+  window.BarberCloud = { start, signIn, signUp, resendConfirmation, signOut, queueSave, configured };
 })();

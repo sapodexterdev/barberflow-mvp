@@ -782,6 +782,21 @@ $("#signupForm").addEventListener("submit", async event => {
   }
 });
 
+$("#resendConfirmation").addEventListener("click", async () => {
+  const email = localStorage.getItem("bf_pending_email") || $("#signupForm").elements.email.value;
+  if (!email) {
+    $("#authMessage").textContent = "Informe seu e-mail na aba Criar conta.";
+    $("#authMessage").className = "auth-message error";
+    return;
+  }
+  try {
+    await window.BarberCloud.resendConfirmation(email);
+  } catch (error) {
+    $("#authMessage").textContent = error.message;
+    $("#authMessage").className = "auth-message error";
+  }
+});
+
 $("#logoutButton").addEventListener("click", () => window.BarberCloud?.signOut());
 
 window.BarberCloud?.start({
