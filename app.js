@@ -204,11 +204,32 @@ function renderAgenda() {
   $("#timeline").innerHTML = times.map(time => {
     const item = items.find(appt => appt.time === time);
     return `<div class="timeline-row"><div class="timeline-hour">${time}</div><div class="timeline-slot">${item ? `
-      <div class="timeline-booking ${item.status === "aguardando" ? "pending" : ""}">
+      <div class="timeline-booking ${item.status === "aguardando" ? "pending" : ""}" draggable="true" data-appointment-id="${item.id}" title="Arraste para alterar o horário">
         <div><strong>${item.name}</strong><small>${item.service} · ${money(item.price)}</small></div>
         <button class="send-reminder" data-id="${item.id}" title="Enviar pelo WhatsApp">◉</button>
-      </div>` : `<button class="empty-slot" data-time="${time}">＋ horário livre</button>`}</div></div>`;
+      </div>` : `<button class="empty-slot" data-time="${time}" data-drop-time="${time}">＋ horário livre</button>`}</div></div>`;
   }).join("");
+}
+
+function moveAppointment(appointmentId, newTime) {
+  const appointment = state.appointments.find(item => item.id === Number(appointmentId));
+  if (!appointment || appointment.time === newTime) return;
+  const conflict = state.appointments.some(item =>
+    item.id !== appointment.id &&
+    item.date === appointment.date &&
+    item.time === newTime &&
+    item.barber === appointment.barber
+  );
+  if (conflict) {
+    showToast("Horário ocupado", `${appointment.barber} já possui atendimento às ${newTime}.`);
+    return;
+  }
+  const previousTime = appointment.time;
+  appointment.time = newTime;
+  persist();
+  renderAgenda();
+  renderDashboard();
+  showToast("Horário alterado", `${appointment.name}: ${previousTime} → ${newTime}.`);
 }
 
 function renderClients(filter = "") {
@@ -760,6 +781,44 @@ $("#timeline").addEventListener("click", event => {
     const item = state.appointments.find(appt => appt.id === Number(reminder.dataset.id));
     whatsapp(item.phone, `Olá, ${item.name}! Passando para lembrar do seu horário hoje às ${item.time} na Barbearia do Rafa. Responda SIM para confirmar. ✂️`);
   }
+});
+
+$("#timeline").addEventListener("dragstart", event => {
+  const booking = event.target.closest("[data-appointment-id]");
+  if (!booking || window.matchMedia("(max-width: 760px)").matches) {
+    event.preventDefault();
+    return;
+  }
+  booking.classList.add("dragging");
+  event.dataTransfer.effectAllowed = "move";
+  event.dataTransfer.setData("text/plain", booking.dataset.appointmentId);
+});
+
+$("#timeline").addEventListener("dragend", event => {
+  event.target.closest("[data-appointment-id]")?.classList.remove("dragging");
+  $$(".empty-slot.drag-over").forEach(slot => slot.classList.remove("drag-over"));
+});
+
+$("#timeline").addEventListener("dragover", event => {
+  const slot = event.target.closest("[data-drop-time]");
+  if (!slot) return;
+  event.preventDefault();
+  event.dataTransfer.dropEffect = "move";
+  $$(".empty-slot.drag-over").forEach(item => { if (item !== slot) item.classList.remove("drag-over"); });
+  slot.classList.add("drag-over");
+});
+
+$("#timeline").addEventListener("dragleave", event => {
+  const slot = event.target.closest("[data-drop-time]");
+  if (slot && !slot.contains(event.relatedTarget)) slot.classList.remove("drag-over");
+});
+
+$("#timeline").addEventListener("drop", event => {
+  const slot = event.target.closest("[data-drop-time]");
+  if (!slot) return;
+  event.preventDefault();
+  slot.classList.remove("drag-over");
+  moveAppointment(event.dataTransfer.getData("text/plain"), slot.dataset.dropTime);
 });
 
 $("#clientList").addEventListener("click", event => {
