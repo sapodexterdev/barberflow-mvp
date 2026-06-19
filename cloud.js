@@ -61,7 +61,7 @@
     if (callbackError) {
       showAuth(true);
       setMessage("O link de confirmação expirou. Solicite um novo e-mail abaixo.", "error");
-      document.querySelector("#resendConfirmation")?.removeAttribute("hidden");
+      document.querySelector("#resendForm")?.classList.add("open");
       history.replaceState({}, document.title, window.location.pathname);
     }
     const { data } = await client.auth.getSession();
@@ -112,7 +112,6 @@
     if (error) throw error;
     if (!data.session) {
       setMessage("Conta criada. Confirme o e-mail para entrar.", "success");
-      document.querySelector("#resendConfirmation")?.removeAttribute("hidden");
     }
   }
 

@@ -782,18 +782,34 @@ $("#signupForm").addEventListener("submit", async event => {
   }
 });
 
-$("#resendConfirmation").addEventListener("click", async () => {
-  const email = localStorage.getItem("bf_pending_email") || $("#signupForm").elements.email.value;
-  if (!email) {
-    $("#authMessage").textContent = "Informe seu e-mail na aba Criar conta.";
-    $("#authMessage").className = "auth-message error";
-    return;
-  }
+$("#showResendConfirmation").addEventListener("click", () => {
+  const form = $("#resendForm");
+  form.classList.add("open");
+  form.elements.email.value = localStorage.getItem("bf_pending_email") || $("#signupForm").elements.email.value || "";
+  form.elements.email.focus();
+});
+
+$("#cancelResendConfirmation").addEventListener("click", () => $("#resendForm").classList.remove("open"));
+
+$("#resendForm").addEventListener("submit", async event => {
+  event.preventDefault();
+  const email = event.currentTarget.elements.email.value.trim();
+  const submit = event.currentTarget.querySelector('button[type="submit"]');
+  submit.disabled = true;
+  submit.textContent = "Enviando…";
   try {
     await window.BarberCloud.resendConfirmation(email);
+    localStorage.setItem("bf_pending_email", email);
+    event.currentTarget.classList.remove("open");
   } catch (error) {
-    $("#authMessage").textContent = error.message;
+    const rateLimited = error.status === 429 || /rate|security purposes|seconds/i.test(error.message);
+    $("#authMessage").textContent = rateLimited
+      ? "Limite temporário do Supabase. Aguarde alguns minutos e tente novamente."
+      : error.message;
     $("#authMessage").className = "auth-message error";
+  } finally {
+    submit.disabled = false;
+    submit.textContent = "Reenviar confirmação";
   }
 });
 
