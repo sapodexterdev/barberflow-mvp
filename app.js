@@ -279,7 +279,7 @@ function renderAllProfessionalsAgenda(times, items) {
     <div class="team-grid team-grid-header">
       <div class="team-time-header">HORÁRIO</div>
       ${professionals.map(professional => `
-        <div class="team-professional-head" style="--professional-color:${professional.color}">
+        <div class="team-professional-head" style="--professional-color:${professionalColor(professional.color)}">
           <span>${initials(professional.name)}</span>
           <div><strong>${professional.name}</strong><small>${professional.specialty}</small></div>
         </div>`).join("")}
@@ -296,7 +296,7 @@ function renderAllProfessionalsAgenda(times, items) {
         );
         if (item) return `
           <div class="team-cell">
-            <div class="team-booking ${item.status === "aguardando" ? "pending" : ""}" style="--professional-color:${professional.color}" draggable="true" data-appointment-id="${item.id}" title="Arraste para alterar o horário">
+            <div class="team-booking ${item.status === "aguardando" ? "pending" : ""}" style="--professional-color:${professionalColor(professional.color)}" draggable="true" data-appointment-id="${item.id}" title="Arraste para alterar o horário">
               <strong>${item.name}</strong>
               <small>${item.service} · ${getAppointmentDuration(item)} min</small>
               <button class="send-reminder" data-id="${item.id}" title="Enviar pelo WhatsApp">◉</button>
@@ -304,7 +304,7 @@ function renderAllProfessionalsAgenda(times, items) {
           </div>`;
         if (coveringItem) return `
           <div class="team-cell">
-            <div class="team-continuation" style="--professional-color:${professional.color}">Em atendimento até ${minutesToTime(timeToMinutes(coveringItem.time) + getAppointmentDuration(coveringItem))}</div>
+            <div class="team-continuation" style="--professional-color:${professionalColor(professional.color)}">Em atendimento até ${minutesToTime(timeToMinutes(coveringItem.time) + getAppointmentDuration(coveringItem))}</div>
           </div>`;
         return `<div class="team-cell"><div class="team-free">Livre</div></div>`;
       }).join("")}
@@ -422,11 +422,22 @@ function initials(name) {
   return name.split(/\s+/).filter(Boolean).slice(0, 2).map(part => part[0]).join("").toUpperCase();
 }
 
+function professionalColor(color) {
+  const legacyColors = {
+    "#2f8f63": "#df8a38",
+    "#436bb2": "#313132",
+    "#bd7a2d": "#93765e",
+    "#8b5bb5": "#5e4935",
+    "#bd5364": "#e0a775"
+  };
+  return legacyColors[color] || color || "#df8a38";
+}
+
 function renderProfessionals() {
   $("#professionalGrid").innerHTML = state.professionals.map(professional => {
     const appointments = state.appointments.filter(item => item.barber === professional.name).length;
     return `
-      <article class="professional-card" style="--professional-color:${professional.color}">
+      <article class="professional-card" style="--professional-color:${professionalColor(professional.color)}">
         <span class="professional-status ${professional.active ? "" : "inactive"}">${professional.active ? "Ativo" : "Inativo"}</span>
         <div class="professional-card-head">
           <div class="professional-avatar">${initials(professional.name)}</div>
@@ -639,7 +650,7 @@ function openProfessionalEditor(professionalId = "") {
   form.elements.accessEmail.value = professional?.accessEmail || "";
   form.elements.defaultDuration.value = String(professional?.defaultDuration || 40);
   form.elements.active.value = String(professional?.active ?? true);
-  const color = professional?.color || "#2f8f63";
+  const color = professionalColor(professional?.color);
   const colorInput = form.querySelector(`input[name="color"][value="${color}"]`);
   if (colorInput) colorInput.checked = true;
   $("#professionalModalEyebrow").textContent = professional ? "EDITAR PROFISSIONAL" : "NOVO PROFISSIONAL";
